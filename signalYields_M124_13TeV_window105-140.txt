@@ -1,0 +1,30 @@
+############### SIGNAL YIELDS ###############
+mass window: 105 <= m4l <= 140
+sqrt(s) = 13 TeV
+integrated lumi. = 3 fb-1
+
+ggH 4mu Untagged 0.90626
+ggH 4mu OneJetTagged 0.471833
+ggH 4mu VBFTagged 0.0474821
+ggH 4mu VHLeptTagged 0.00276528
+ggH 4mu VHHadrTagged 0.0134217
+ggH 4mu ttHTagged 0.000134892
+ggH 4e Untagged 0.506094
+ggH 4e OneJetTagged 0.261884
+ggH 4e VBFTagged 0.0269784
+ggH 4e VHLeptTagged 0.00128147
+ggH 4e VHHadrTagged 0.00741905
+ggH 4e ttHTagged 0
+ggH 2e2mu Untagged 0.672473
+ggH 2e2mu OneJetTagged 0.337892
+ggH 2e2mu VBFTagged 0.0333858
+ggH 2e2mu VHLeptTagged 0.00155125
+ggH 2e2mu VHHadrTagged 0.00782373
+ggH 2e2mu ttHTagged 0
+ggH 2mu2e Untagged 0.525858
+ggH 2mu2e OneJetTagged 0.279554
+ggH 2mu2e VBFTagged 0.0286645
+ggH 2mu2e VHLeptTagged 0.0016187
+ggH 2mu2e VHHadrTagged 0.00890285
+ggH 2mu2e ttHTagged 6.74459e-05
+

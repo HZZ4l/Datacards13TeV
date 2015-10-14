@@ -1,0 +1,55 @@
+############### IRREDUCIBLE BACKGROUND YIELDS ###############
+mass window: 70 <= m4l <= 1000
+sqrt(s) = 13 TeV
+integrated lumi. = 3 fb-1
+
+qqZZ 4mu Untagged 21.1584
+qqZZ 4mu OneJetTagged 8.87361
+qqZZ 4mu VBFTagged 0.537514
+qqZZ 4mu VHLeptTagged 0.138769
+qqZZ 4mu VHHadrTagged 0.0498435
+qqZZ 4mu ttHTagged 0.00169921
+qqZZ 4e Untagged 12.5971
+qqZZ 4e OneJetTagged 5.44016
+qqZZ 4e VBFTagged 0.352302
+qqZZ 4e VHLeptTagged 0.0792964
+qqZZ 4e VHHadrTagged 0.0317185
+qqZZ 4e ttHTagged 0.00283201
+qqZZ 2e2mu Untagged 13.6564
+qqZZ 2e2mu OneJetTagged 5.96019
+qqZZ 2e2mu VBFTagged 0.348903
+qqZZ 2e2mu VHLeptTagged 0.090058
+qqZZ 2e2mu VHHadrTagged 0.0317185
+qqZZ 2e2mu ttHTagged 0.00169921
+qqZZ 2mu2e Untagged 14.8829
+qqZZ 2mu2e OneJetTagged 6.67736
+qqZZ 2mu2e VBFTagged 0.453686
+qqZZ 2mu2e VHLeptTagged 0.109882
+qqZZ 2mu2e VHHadrTagged 0.0294529
+qqZZ 2mu2e ttHTagged 0.00396482
+
+ggZZ 4mu Untagged 1.66419
+ggZZ 4mu OneJetTagged 1.07341
+ggZZ 4mu VBFTagged 0.126249
+ggZZ 4mu VHLeptTagged 0.0121182
+ggZZ 4mu VHHadrTagged 2.87852e-05
+ggZZ 4mu ttHTagged 0.000252786
+ggZZ 4e Untagged 1.13991
+ggZZ 4e OneJetTagged 0.729812
+ggZZ 4e VBFTagged 0.0859994
+ggZZ 4e VHLeptTagged 0.00752627
+ggZZ 4e VHHadrTagged 5.69386e-05
+ggZZ 4e ttHTagged 0.00016488
+ggZZ 2e2mu Untagged 1.14442
+ggZZ 2e2mu OneJetTagged 0.764093
+ggZZ 2e2mu VBFTagged 0.0940778
+ggZZ 2e2mu VHLeptTagged 0.00924485
+ggZZ 2e2mu VHHadrTagged 4.44253e-05
+ggZZ 2e2mu ttHTagged 0.000191994
+ggZZ 2mu2e Untagged 1.44774
+ggZZ 2mu2e OneJetTagged 0.961371
+ggZZ 2mu2e VBFTagged 0.115346
+ggZZ 2mu2e VHLeptTagged 0.00948098
+ggZZ 2mu2e VHHadrTagged 1.47688e-05
+ggZZ 2mu2e ttHTagged 0.000265838
+
