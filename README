@@ -1,0 +1,146 @@
+This tool produces datacards from config files (normally in yaml format).
+- to learn some yaml syntax (pretty human readable and easy to learn) go to: https://en.wikipedia.org/wiki/YAML
+
+
+---------------------
+The Main Config file
+---------------------
+
+The main configuration file that "unites them all" is e.g. build_datacards_from_dict.yaml.
+
+It is modularized by event category (final state) and then by physics process (ggH, qqZZ ...)
+like the datacards normally are.
+
+In e.g. '2e2mu'category you can find keys like 'ggH' and 'qqZZ' which denot the 2 processes which
+contribute to this category, but also keys like [category, functions_and_definitions, setup, systematics, observation].
+They are special sections and will be recognized by the DatacardBuilde class.
+
+We don't put all the information in a single configuration, but in different fragments like
+systematics.yaml and yield.yaml. To pick-up the info from these files we can simply use syntax e.g.:
+    ---
+    INSERT(yield.yaml:2e2mu:ggH)
+    ---
+which will pickup the yield for ggH under 2e2mu final state from yileds.yaml!
+
+----------------------------------
+Running the Card Builder (example)
+----------------------------------
+1) update your configuration if you like
+2) make sure you have CMSSW environment and HiggsCombination package (we load RooFit libs from there)
+3) python build_datacards_from_dict.py --cfg build_datacards_from_dict.yaml --category 2e2mu -v 10
+4) to run all multiple cards from the same configuratio (eg. 2e2mu, 4e, 4mu):
+   python build_datacards_from_dict.py --cfg build_datacards_from_dict.yaml --category 2e2mu,4e,4mu -v 10
+5) the product of the builder are text datacards that point to a RooWorkspace.
+6) Use this cards as you like then
+
+
+
+
+---------------------------------
+RooWorkspace Factory Instructions
+---------------------------------
+
+    Process high-level object creation syntax
+    Accepted forms of syntax are
+
+    Creating variables
+
+    x[-10,10]             -  Create variable x with given range and put it in workspace
+    x[3,-10,10]           -  Create variable x with given range and initial value and put it in workspace
+    x[3]                  -  Create variable x with given constant value
+
+    <numeric literal>     - Numeric literal expressions (0.5, -3 etc..) are converted to a RooConst(<numeric literal>)
+                            where ever a RooAbsReal or RooAbsArg argument is expected
+
+    Creating categories
+
+    c[lep,kao,nt1,nt2]    -  Create category c with given state names
+    tag[B0=1,B0bar=-1]    -  Create category tag with given state names and index assignments
+
+
+    Creating functions and p.d.f.s
+
+    MyPdf::g(x,m,s)       - Create p.d.f or function of type MyPdf with name g with argument x,m,s
+                            Interpretation and number of arguments are mapped to the constructor arguments of the class
+                            (after the name and title).
+
+    MyPdf(x,m,s)          - As above, but with an implicitly defined (unique) object name
+
+
+    Creating sets and lists (to be used as inputs above)
+
+    {a,b,c}               - Create RooArgSet or RooArgList (as determined by context) from given contents
+
+
+
+    Objects that are not created, are assumed to exist in the workspace
+    Object creation expressions as shown above can be nested, e.g. one can do
+
+    RooGaussian::g(x[-10,10],m[0],3)
+
+    to create a p.d.f and its variables in one go. This nesting can be applied recursively e.g.
+
+    SUM::model( f[0.5,0,1] * RooGaussian::g( x[-10,10], m[0], 3] ),
+                            RooChebychev::c( x, {a0[0.1],a1[0.2],a2[-0.3]} ))
+
+    creates the sum of a Gaussian and a Chebychev and all its variables
+
+
+    A seperate series of operator meta-type exists to simplify the construction of composite expressions
+    meta-types in all capitals (SUM) create p.d.f.s, meta types in lower case (sum) create
+    functions.
+
+
+    SUM::name(f1*pdf1,f2*pdf2,pdf3]  -- Create sum p.d.f name with value f1*pdf1+f2*pdf2+(1-f1-f2)*pdf3
+    RSUM::name(f1*pdf1,f2*pdf2,pdf3] -- Create recursive sum p.d.f. name with value f1*pdf1 + (1-f1)(f2*pdf2 + (1-f2)pdf3)
+    ASUM::name(f1*amp1,f2*amp2,amp3] -- Create sum p.d.f. name with value f1*amp1+f2*amp2+(1-f1-f2)*amp3 where amplX are amplitudes of type RooAbsReal
+    sum::name(a1,a2,a3]              -- Create sum function with value a1+a2+a3
+    sum::name(a1*b1,a2*b2,a3*b 3]    -- Create sum function with value a1*b1+a2*b2+a3*b3
+
+    PROD::name(pdf1,pdf2]            -- Create product of p.d.f with 'name' with given input p.d.fs
+    PROD::name(pdf1|x,pdf2]          -- Create product of conditional p.d.f. pdf1 given x and pdf2
+    prod::name(a,b,c]                -- Create production function with value a*b*c
+
+    SIMUL::name(cat,a=pdf1,b=pdf2]   -- Create simultaneous p.d.f index category cat. Make pdf1 to state a, pdf2 to state b
+
+    EXPR::name('expr',var,...]       -- Create an generic p.d.f that interprets the given expression
+    expr::name('expr',var,...]       -- Create an generic function that interprets the given expression
+
+
+    The functionality of high level object creation tools like RooSimWSTool, RooCustomizer and RooClassFactory
+    is also interfaced through meta-types in the factory
+
+
+    Interface to RooSimWSTool
+
+    SIMCLONE::name( modelPdf, $ParamSplit(...),
+                    $ParamSplitConstrained(...), $Restrict(...) ]            -- Clone-and-customize modelPdf according to ParamSplit and ParamSplitConstrained()
+                                                                                specifications and return a RooSimultaneous p.d.f. of all built clones
+
+    MSIMCLONE::name( masterIndex,
+                    $AddPdf(mstate1, modelPdf1, $ParamSplit(...)),
+                    $AddPdf(mstate2,modelPdf2),...) ]                       -- Clone-and-customize multiple models (modelPdf1,modelPdf2) according to ParamSplit and
+                                                                                ParamSplitConstrained() specifications and return a RooSimultaneous p.d.f. of all built clones,
+                                                                                using the specified master index to map prototype p.d.f.s to master states
+    Interface to RooCustomizer
+
+    EDIT::name( orig, substNode=origNode), ... ]                             -- Create a clone of input object orig, with the specified replacements operations executed
+    EDIT::name( orig, origNode=$REMOVE(), ... ]                              -- Create clone of input removing term origNode from all PROD() terms that contained it
+    EDIT::name( orig, origNode=$REMOVE(prodname,...), ... ]                  -- As above, but restrict removal of origNode to PROD term(s) prodname,...
+
+
+    Interface to RooClassFactory
+
+    CEXPR::name('expr',var,...]       -- Create an custom compiled p.d.f that evaluates the given expression
+    cexpr::name('expr',var,...]       -- Create an custom compiled function that evaluates the given expression
+
+
+    $MetaType(...)        - Meta argument that does not result in construction of an object but is used logically organize
+                            input arguments in certain operator p.d.f. constructions. The defined meta arguments are context dependent.
+
+                            The only meta argument that is defined globally is $Alias(typeName,aliasName) to
+                            define aliases for type names. For the definition of meta arguments in operator p.d.f.s
+                            see the definitions below
+
+
+...
