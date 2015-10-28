@@ -1,0 +1,71 @@
+2e2mu:
+    lumi:
+        type : lnN
+        ggH : 1.026
+        qqZZ : 1.026
+        ttH : 1.026
+        #DY : 1.026
+
+    cms_eff_m:
+        type : lnN
+        ggH : 1.05
+        VBF : 1.03
+        zjets : 1.1
+        qqZZ : 1.01
+
+    cms_eff_e:
+        type : lnN
+        ggH : 1.01
+        VBF : 1.05
+        ttH : 1.1
+
+    cms_zz4l_bkg:
+        type : param 0.0 1 [-3,3]
+
+4mu:
+    lumi:
+        type : lnN
+        ggH : 1.013
+        qqZZ : 1.013
+        ttH : 1.013
+
+    cms_eff_m:
+        type : lnN
+        ggH : 1.02
+        VBF : 1.02
+        zjets : 1.12
+        qqZZ : 1.01
+
+    cms_eff_e:
+        type : lnN
+        ggH : 1.03
+        VBF : 1.04
+        ttH : 1.12
+
+    cms_zz4l_bkg:
+        type : param 0.0 1 [-3,3]
+
+   
+
+4e:
+    lumi:
+        type : lnN
+        ggH : 1.013
+        qqZZ : 1.013
+        ttH : 1.013
+
+    cms_eff_m:
+        type : lnN
+        ggH : 1.02
+        VBF : 1.02
+        zjets : 1.12
+        qqZZ : 1.01
+
+    cms_eff_e:
+        type : lnN
+        ggH : 1.03
+        VBF : 1.04
+        ttH : 1.12
+
+    cms_zz4l_bkg:
+        type : param 0.0 1 [-3,3]
