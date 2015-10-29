@@ -35,7 +35,6 @@ Running the Card Builder (example)
 
 
 
-
 ---------------------------------
 RooWorkspace Factory Instructions
 ---------------------------------
@@ -143,4 +142,21 @@ RooWorkspace Factory Instructions
                             see the definitions below
 
 
-...
+
+
+----------------------------
+Presentations and progress
+----------------------------
+1) Giacomo Ortona 15/10/2015 https://indico.cern.ch/event/439328/session/1/contribution/22/attachments/1164369/1677912/CardDiscussion_15_10_02.pdf
+    - discussion on inputs and division of labour
+
+2) Roko Plestina  28/10/2015 https://indico.cern.ch/event/447076/session/4/contribution/21/attachments/1178146/1704305/datacard_format_and_maker_Oct28.pdf
+    - first prototype of datacards input format and base datacard maker
+    - TODO:
+        - provide example of mixing 2 signals and 2 backgrounds (or more) with template and analytic shapes
+        - reading trees for observation
+        - reading templates from files with histograms
+        - examination of naming convention (tool to analyze datacard)
+        - separating category inputs into files (also systematics into categories related to theory)
+
+

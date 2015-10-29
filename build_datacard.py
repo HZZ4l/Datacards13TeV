@@ -94,6 +94,7 @@ class DatacardBuilder(object):
                     process      {process_number}
                     rate         {process_rate}
                     ---------------------------------------
+                    {process_systematics}
                    """.format(cat = self.datacard_name,
                               jmax = (len(self.process_list)-1),
                               kmax = self.n_systematics,
@@ -103,6 +104,7 @@ class DatacardBuilder(object):
                               process_name = self.process_lines['name'],
                               process_number = self.process_lines['number'],
                               process_rate = self.process_lines['rate'],
+                              process_systematics = self.process_lines['sys'],
                               #process_systematics = self.systematics_lines,
                               card_header = self.card_header
                               )
