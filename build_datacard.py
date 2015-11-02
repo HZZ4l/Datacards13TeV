@@ -5,16 +5,18 @@
 # Purpose:
 #    - building "combine" datacards from dictionaries[category/final_state][process]
 #-----------------------------------------------
-import sys,os
+import sys,os,re
 import optparse
 import pprint, textwrap
 import string
 
-from ROOT import RooWorkspace, RooArgSet,gSystem
-
+#from ROOT import RooWorkspace, RooArgSet, RooArgList
+#from ROOT import RooDataHist, RooHistPdf, gSystem
+from ROOT import *
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
 from lib.util.Logger import *
 from lib.util.UniversalConfigParser import UniversalConfigParser
+from lib.RootHelpers.RootHelperBase import RootHelperBase
 
 class DatacardBuilder(object):
     """
@@ -70,7 +72,10 @@ class DatacardBuilder(object):
 
     def make_txt_card(self):
         """Make text part of the datacard and dump to a file.
-            - loop on processes and fill in txt card lines
+
+        - loop on processes and fill in txt card lines
+        - look fr systematics
+        - check if there are shapes
         """
         self.process_lines = self._get_process_lines()
         self.n_systematics, self.systematics_lines = self._get_systematics_lines()
@@ -95,11 +100,11 @@ class DatacardBuilder(object):
                     rate         {process_rate}
                     ---------------------------------------
                     {process_systematics}
-                   """.format(cat = self.datacard_name,
+                   """.format(cat = self.d_input['category'],
                               jmax = (len(self.process_list)-1),
                               kmax = self.n_systematics,
                               shapes_line = self._get_shapes_line(),
-                              n_observed = self._get_observation(),
+                              n_observed = self._get_observed_rate(),
                               process_cat = self.process_lines['bin'],
                               process_name = self.process_lines['name'],
                               process_number = self.process_lines['number'],
@@ -122,21 +127,111 @@ class DatacardBuilder(object):
             self.log.info('Datacard saved: {0}'.format(file_datacard_name))
 
 
+    def make_workspace(self):
+        """Make RooWorkspace and dump to a file.
+
+        - define all the functions and variables
+        - define shapes
+        - fetch dataset from root-trees
+        """
+
+        gSystem.AddIncludePath("-I$CMSSW_BASE/src/ ")
+        gSystem.Load("$CMSSW_BASE/lib/slc5_amd64_gcc472/libHiggsAnalysisCombinedLimit.so")
+        gSystem.AddIncludePath("-I$ROOFITSYS/include")
+
+        self.w = RooWorkspace('w')
+        #run all functions_and_definitions:
+
+        #setup-level functions_and_definitions
+        for statement in self._get_functions_and_definitions(self.d_input['setup']):
+            self.w.factory(statement)
+
+        #setup-0 functions_and_definitions
+        for statement in self._get_functions_and_definitions(self.d_input):
+            self.w.factory(statement)
+
+        for p_id, p_setup in self.d_input['processes'].iteritems():
+            #setup-1 functions_and_definitions (under process name)
+            for statement in self._get_functions_and_definitions(p_setup):
+                self.w.factory(statement)
+
+            self.log.debug('Checking shape in {0}/{1}'.format(self.datacard_name, p_id))
+            try:
+                p_setup['shape']
+            except KeyError:
+                raise KeyError, ('No shape defined for process {0}. '
+                                 'Define at least RooUniform:{0}(var1[var2, ...])'
+                                 .format(p_id))
+            else:
+                if p_setup['shape']:
+                    self.shapes_exist = True
+
+                    if p_setup['shape'].lower().startswith('template'):
+                        the_template = self._get_template(p_setup['shape'])
+                        if self.DEBUG:
+                            self.log.debug('Imported template for {0}'.format(p_id))
+                            the_template.Print('v')
+                    else:
+                        self.w.factory(p_setup['shape'])
+        self.log.debug('Printing workspace...')
+
+        #get the RooDataset
+        self.data_obs = self.w.pdf('ggH').generate(RooArgSet(self.w.var('mass4l')),
+                                                   self._get_observed_rate())
+
+        self.data_obs.SetNameTitle('data_obs','data_obs')
+        getattr(self.w,'import')(self.data_obs)
+        if self.DEBUG:
+            print 20*"----"
+            self.w.Print()
+            print 20*"----"
+        self.w.writeToFile(self.shapes_output_file)
+        self.log.debug('Datacard workspace written to {0}'.format(self.shapes_output_file))
+
+
+    def scale_lumi_by(self, lumi_scaling):
+        """
+        Scales luminosity in datacards by a fixed factor.
+
+        This can be used to get exclusion limits projections with higher
+        luminosities.
+        """
+        self.lumi_scaling = lumi_scaling
+        if self.lumi_scaling != 1.0:
+            self.card_header+='Rates in datacard are scaled by a factor of {0}'.format(self.lumi_scaling)
+
+        self.log.debug('Rates in datacards will be scaled by a factor of {0}'.format(self.lumi_scaling))
+
+
+    def _get_functions_and_definitions(self,data):
+        """Get list of functions_and_definitions to be defined with RooWSFactory.
+
+        Checks if 'data' contains key 'functions_and_definitions' and returns
+        list of those to be defined.
+        """
+        try:
+            return data['functions_and_definitions']
+        except KeyError:
+            self.log.debug(('This section of configuration has no '
+                'functions_and_definitions defined. '
+                'Returning empty list. Section={0}'.format(data)))
+            return []
+
+
 
     def _get_shapes_line(self):
-        """
-        Gets the line with shape
+        """Gets the line with shape
         shapes *    {cat}  {cat}.root w:$PROCESS
         """
         self.shapes_exist = False
         for p in self.process_list:
             self.log.debug('Checking for shape in {0}/{1}'.format(self.datacard_name, p))
             try:
-                self.d_input[p]['shape']
+                self.d_input['processes'][p]['shape']
             except KeyError:
                 pass
             else:
-                if self.d_input[p]['shape']:
+                if self.d_input['processes'][p]['shape']:
                     self.shapes_exist = True
                     self.shapes_output_file = "{0}.input.root".format(self.datacard_name)
                     if self.lumi_scaling != 1.0:
@@ -144,9 +239,63 @@ class DatacardBuilder(object):
                     break
 
         if self.shapes_exist:
-            return "shapes *    cat_{cat}  {shapes_output_file} w:$PROCESS".format(cat = self.datacard_name, shapes_output_file = self.shapes_output_file)
+            return "shapes *    cat_{0}  {1} w:$PROCESS".format(self.datacard_name,
+                                                                self.shapes_output_file)
         else:
             return "#shapes are not used - counting experiment card"
+
+    def _get_template(self, shape_setup):
+        """Get template from histogram and make it RooHistPdf.
+        """
+        self.log.debug('Creating RooHistPdf from given histogram.')
+        all_matches = re.findall("Template::(.+?)\((.+?)\)",shape_setup)
+
+        template_name = all_matches[0][0].strip()
+        template_args = [arg.strip() for arg in all_matches[0][1].split(',')]
+        assert len(template_args)>1, ('Templates need to be provided in the form: '
+                                      'Template::name(obs1,[obs2,obs3], a/b/c.root/hist)')
+
+        template_observables = template_args[:-1]
+        template_path = template_args[-1]
+
+        self.log.debug('Template name: {0}, arguments: {1}'.format(template_name,
+                                                                  template_args))
+
+        #fetch the template from file
+        root_helper = RootHelperBase()
+        histo = root_helper.get_histogram(template_path)
+        template_name_cat = template_name+'_'+self.d_input['category']
+
+        #ral_observables = RooArgList(self.w.factory('{{0}}'.format(
+                                            #string.join(template_observables,','))))
+
+        #ras_observables = RooArgSet(ral_observables)
+
+        ral_observables = RooArgList()
+        ras_observables = RooArgSet()
+        for obs in template_observables:
+            if self.w.allVars().find(obs):
+                ral_observables.add(self.w.var(obs))
+                ras_observables.add(self.w.var(obs))
+            else:
+                raise NameError, "The observable '{0}' is not defined.".format(obs)
+
+        if self.DEBUG:
+            ral_observables.Print()
+            ras_observables.Print()
+
+
+        roo_data_hist  = RooDataHist('rdh_'+template_name_cat, template_name_cat,
+                                     ral_observables, RooFit.Import(histo,kFALSE))
+
+        roo_hist_pdf   = RooHistPdf(template_name,template_name,
+                                    ras_observables,
+                                    roo_data_hist)
+
+        getattr(self.w,'import')(roo_hist_pdf)
+
+        return self.w.pdf(roo_hist_pdf.GetName())
+
 
 
 
@@ -156,12 +305,11 @@ class DatacardBuilder(object):
         sig_process_list = []
         bkg_process_list = []
         process_list=[]
-        for p in self.d_input.keys():
-            if p not in self.not_a_process:
-                if self.d_input[p]['is_signal']:
-                    sig_process_list.append(p)
-                else:
-                    bkg_process_list.append(p)
+        for p_id, p_setup in self.d_input['processes'].iteritems():
+            if p_setup['is_signal']:
+                sig_process_list.append(p_id)
+            else:
+                bkg_process_list.append(p_id)
 
         if 'signal' in process_type.lower():
             process_list+=sorted(sig_process_list)
@@ -172,21 +320,10 @@ class DatacardBuilder(object):
 
 
     def _get_process_lines(self):
-        """
-        Gets and formats lines coresponding to processes from the self.process_list
+        """Gets and formats lines corresponding to processes from the
+        self.process_list
         """
         process_lines = {'bin': '', 'name':'', 'number':'', 'rate':'','sys':''}
-        #get enumerates from signal and background processes
-        #signal_process_list = []
-        #bkg_process_list = []
-        #for p in self.process_list:
-            #if self.d_input[p]['is_signal']:
-                #signal_process_list.append(p)
-            #else:
-                #bkg_process_list.append(p)
-
-        #self.signal_process_list = sorted(signal_process_list)
-        #self.bkg_process_list = sorted(bkg_process_list)
 
         signal_process_dict = dict(enumerate(self.signal_process_list, start=-(len(self.signal_process_list)-1)))
         bkg_process_dict    = dict(enumerate(self.bkg_process_list, start=1))
@@ -201,10 +338,11 @@ class DatacardBuilder(object):
                 delimiter = ''
                 is_first = False
             p_name = signal_process_dict[p_number]
+            p_setup = self.d_input['processes'][p_name]
             process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
-            process_lines['rate']   += ( delimiter + str(float(self.d_input[p_name]['rate'])  * self.lumi_scaling) )
+            process_lines['rate']   += ( delimiter + str(float(p_setup['rate'])  * self.lumi_scaling) )
             process_lines['sys']     = "#systematics line: not implemented yet!!!"
 
         for p_number in sorted(bkg_process_dict.keys()):
@@ -214,26 +352,25 @@ class DatacardBuilder(object):
                 delimiter = ''
                 is_first = False
             p_name = bkg_process_dict[p_number]
+            p_setup = self.d_input['processes'][p_name]
             process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
-            process_lines['rate']   += ( delimiter + str(float(self.d_input[p_name]['rate']) * self.lumi_scaling) )
+            process_lines['rate']   += ( delimiter + str(float(p_setup['rate']) * self.lumi_scaling) )
             process_lines['sys']     = "#systematics line: not implemented yet!!!"
 
 
         return process_lines
 
 
-    def _get_observation(self):
-        """
-        Read the data from trees and applies a cut.
+    def _get_observed_rate(self):
+        """Read the data from trees and applies a cut.
         So far, we only get rate directly as a number.
         """
         return self.d_input['observation']['rate']
 
     def _get_systematics_lines(self):
-        """
-        Find systematics and construct a table/dict
+        """Find systematics and construct a table/dict
         """
         systematics_lines_list = []
         sys_dict = self.d_input['systematics']
@@ -269,56 +406,6 @@ class DatacardBuilder(object):
         return (n_systematics, systematics_lines)
 
 
-    def make_workspace(self):
-        """Make RooWorkspace and dump to a file"""
-
-        gSystem.AddIncludePath("-I$CMSSW_BASE/src/ ");
-        gSystem.Load("$CMSSW_BASE/lib/slc5_amd64_gcc472/libHiggsAnalysisCombinedLimit.so");
-        gSystem.AddIncludePath("-I$ROOFITSYS/include");
-
-
-
-        self.w = RooWorkspace('w')
-        #run all functions_and_definitions:
-        for factory_statement in self.d_input['functions_and_definitions']:
-            self.w.factory(factory_statement)
-
-        for p in self.process_list:
-            self.log.debug('Checking for shape in {0}/{1}'.format(self.datacard_name, p))
-            try:
-                self.d_input[p]['shape']
-            except KeyError:
-                pass
-            else:
-                if self.d_input[p]['shape']:
-                    self.shapes_exist = True
-                    self.w.factory(self.d_input[p]['shape'])
-        self.log.debug('Printing workspace...')
-
-        self.data_obs = self.w.pdf('ggH').generate(RooArgSet(self.w.var('mass4l')), self._get_observation())
-
-        self.data_obs.SetNameTitle('data_obs','data_obs')
-        getattr(self.w,'import')(self.data_obs)
-        if self.DEBUG:
-            print 20*"----"
-            self.w.Print()
-            print 20*"----"
-        self.w.writeToFile(self.shapes_output_file)
-        self.log.debug('Datacard workspace written to {0}'.format(self.shapes_output_file))
-
-
-    def scale_lumi_by(self, lumi_scaling):
-        """
-        Scales luminosity in datacards by a fixed factor. This can be
-        used to get exclusion limits projections with higher luminosities.
-        """
-        self.lumi_scaling = lumi_scaling
-        if self.lumi_scaling != 1.0:
-            self.card_header+='Rates in datacard are scaled by a factor of {0}'.format(self.lumi_scaling)
-
-        self.log.debug('Rates in datacards will be scaled by a factor of {0}'.format(self.lumi_scaling))
-
-
 
 
 def parseOptions():
@@ -326,10 +413,20 @@ def parseOptions():
     usage = ('usage: %prog [options] \n'
              + '%prog -h for help')
     parser = optparse.OptionParser(usage)
-    parser.add_option(''  , '--cfg', dest='config_filename', type='string', default="build_datacards_from_dict.yaml",    help='Name of the file with full configuration')
-    parser.add_option('-c', '--category', dest='category', type='string', default="ALL",    help='Name of the section/category from yaml cfg file to be run. We produce one datacards  txt/workspace pair per section.')
-    parser.add_option('-s', '--scale_lumi_by', dest='scale_lumi_by', type='float', default=1.0,    help='Scale luminosity in cards by this factor.')
-    parser.add_option('-v', '--verbosity', dest='verbosity', type='int', default=10, help='Set the levelof output for all the subscripts. Default [10] = very verbose')
+    parser.add_option(''  , '--cfg', dest='config_filename', type='string',
+                      default="build_datacards_from_dict.yaml",
+                      help='Name of the file with full configuration')
+    parser.add_option('-c', '--category', dest='category', type='string',
+                      default = None,
+                      help=('Name of the section/category from yaml cfg file to be run. '
+                            'We produce one datacards  txt/workspace pair per section. '
+                            'If not specified we assume that we process the whole '
+                            'config_filename.'))
+    parser.add_option('-s', '--scale_lumi_by', dest='scale_lumi_by', type='float',
+                      default=1.0,    help='Scale luminosity in cards by this factor.')
+    parser.add_option('-v', '--verbosity', dest='verbosity', type='int',
+                      default=10, help=('Set the levelof output for all the subscripts. '
+                          'Default [10] --> very verbose'))
 
     # store options and arguments as global variables
     global opt, args
@@ -340,17 +437,31 @@ def main():
     parseOptions()
     #read configuration
     os.environ['PYTHON_LOGGER_VERBOSITY'] =  str(opt.verbosity) #will be checked/used by all Loggers
-    cfg_reader = UniversalConfigParser(cfg_type="YAML",file_list = opt.config_filename)
+    cfg_reader = UniversalConfigParser(file_list = opt.config_filename)
     pp = pprint.PrettyPrinter(indent=4)
     full_config = cfg_reader.get_dict()
 
-    categories = opt.category.split(',')
-    for cat in categories:
-        datacard_builder = DatacardBuilder(datacard_name = cat , datacard_input = full_config[cat])
-        pp.pprint(full_config[cat])
-        datacard_builder.scale_lumi_by(opt.scale_lumi_by)
-        datacard_builder.make_txt_card()
-        datacard_builder.make_workspace()
+    #categories = opt.category.split(',')
+    #for cat in categories:
+        #datacard_builder = DatacardBuilder(datacard_name = cat , datacard_input = full_config[cat])
+        #pp.pprint(full_config[cat])
+        #datacard_builder.scale_lumi_by(opt.scale_lumi_by)
+        #datacard_builder.make_txt_card()
+        #datacard_builder.make_workspace()
+
+    cfg_reader.dump_to_yaml('full_configs/'+opt.config_filename, full_config)
+    cfg_reader.dump_to_json('full_configs/'+opt.config_filename.replace('yaml','json'),
+                            full_config)
+
+    datacard_name = opt.config_filename.rstrip('.yaml')
+    datacard_builder = DatacardBuilder(datacard_name = datacard_name ,
+                                        datacard_input = full_config)
+    pp.pprint(full_config)
+    datacard_builder.scale_lumi_by(opt.scale_lumi_by)
+    datacard_builder.make_txt_card()
+    datacard_builder.make_workspace()
+
+
 
 if __name__=="__main__":
     main()

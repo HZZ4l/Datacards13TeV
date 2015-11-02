@@ -1,7 +1,6 @@
-#! /usr/bin/env python
-#import pprint
 from Logger import *
 import re, string, pdb
+import os.path
 
 #TODO: instead of update put recursive update from MiscTools.py
 
@@ -31,7 +30,8 @@ class UniversalConfigParser(object):
 	    #cfg_type = re.sub(r".",'',os.path.splitext(file_name)[-1]).lower()
 	    cfg_type = os.path.splitext(file_name)[1].replace('.','')
 
-	assert cfg_type in self.supported_cfg_types,"Cannont figure out the configuration file type. Supported CFG types are only {0}".format(self.supported_cfg_types)
+	assert cfg_type in self.supported_cfg_types,("Cannont figure out the "
+             "configuration file type. Supported CFG types are only {0}").format(self.supported_cfg_types)
 	return cfg_type
 
     def set_cfg_type(self,cfg_type):
@@ -41,7 +41,8 @@ class UniversalConfigParser(object):
 	try: cfg_type  = cfg_type.lower()
 	except AttributeError:
 	    raise AttributeError, "You have to provide a string as CFG type."
-	assert cfg_type in self.supported_cfg_types,"CFG type not supported. Supported CFG types are only {0}".format(self.supported_cfg_types)
+	assert cfg_type in self.supported_cfg_types,("CFG type not supported."
+            "Supported CFG types are only {0}").format(self.supported_cfg_types)
 	return cfg_type
 
     def setLogLevel(self,level): self.log.setLevel(level)
@@ -53,17 +54,20 @@ class UniversalConfigParser(object):
 	if file_list==None: return []
 	import types
 	isString = isinstance(file_list, types.StringTypes)
-	isList = isinstance(file_list, list)
-	assert isString or isList, "You should provide a list of files as list or as CVS string!"
+	isList   = isinstance(file_list, list)
+	assert isString or isList,('You should provide a list of files as '
+                                    'list or as CVS string!')
 	if isList: return file_list
 	if isString :
 	  import re
-	  file_list_converted = re.sub(r'\s', '', file_list).split(',') #remove all whitespaces
+	  #remove all whitespaces
+	  file_list_converted = re.sub(r'\s', '', file_list).split(',')
 	  return file_list_converted
 
     def item(self, item_name):
-	"""
-	Get one item from cfg dictionary. If the item is nested, then use "." to set the path to the item.
+	"""Get one item from cfg dictionary.
+
+	If the item is nested, then use "." to set the path to the item.
 	Check the implementation in XmlDictConverter.py
 	"""
 	self.log.info('Not implemented yet... Sorry!')
@@ -101,7 +105,7 @@ class UniversalConfigParser(object):
 
     def _interpret_keywords_and_update(self, this_dict):
         """
-        - check for interpreter_keywors
+        - check for interpreter_keywords
         - loop on dict and update values with values from another cfg.
         - used to input values from other cfg files.
         """
@@ -175,7 +179,8 @@ class UniversalConfigParser(object):
                     filename = inputs[0]
                     keys = inputs[1:]
                     if filename!='THIS_CONFIG':
-                        another_cfg_reader = UniversalConfigParser(cfg_type="YAML",file_list = filename)
+                        another_cfg_reader = UniversalConfigParser(cfg_type="YAML",
+                                                                   file_list = filename)
                         full_config = another_cfg_reader.get_dict()
                         #TODO check that youare notrreading the same file which is already read not to blow up the memory.
                         #print full_config
@@ -188,6 +193,8 @@ class UniversalConfigParser(object):
                                 return partial_config
                             else:
                                 new_input_line+=str(partial_config)  #basically inserts value
+                        else:
+                            return full_config
                     else:
                         raise RuntimeError, 'THIS_CONFIG is not yet implemented keyword!'
 
@@ -209,9 +216,9 @@ class UniversalConfigParser(object):
 
 
     def _get_dict_yaml(self,file_name):
-	self.log.debug('Reading yaml configuration and updating dictionary.')
-	import yaml
-	with open(file_name,'r') as fd:
+        self.log.debug('Reading yaml configuration and updating dictionary.')
+        import yaml
+        with open(file_name,'r') as fd:
             self.cfg_dict.update(yaml.load(fd))
 
 
@@ -237,6 +244,9 @@ class UniversalConfigParser(object):
 
     def dump_to_json(self,json_file_name, new_dict):
        import json
+       if not os.path.exists(os.path.dirname(json_file_name)):
+            os.makedirs(os.path.dirname(json_file_name))
+
        with open(json_file_name, "w") as json_file:
             json_file.write(json.dumps(new_dict, indent=4))
             self.log.info('Written json file: {0}'.format(json_file_name))
@@ -244,6 +254,8 @@ class UniversalConfigParser(object):
 
     def dump_to_yaml(self,yaml_file_name, new_dict):
         import yaml
+        if not os.path.exists(os.path.dirname(yaml_file_name)):
+            os.makedirs(os.path.dirname(yaml_file_name))
         with open(yaml_file_name, 'w') as yaml_file:
             yaml_file.write( yaml.dump(new_dict, default_flow_style=False))
             self.log.info('Written yaml file: {0}'.format(yaml_file_name))

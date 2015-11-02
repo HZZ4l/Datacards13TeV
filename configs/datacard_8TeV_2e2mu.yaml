@@ -1,0 +1,78 @@
+---
+
+INFO: |
+    - datacard inputs per category (final state) and then split to subrprocesses
+    - this is a test configuration
+
+COMMON_SETUP: &COMMON_SETUP
+    words_to_be_replaced: [SQRTS, PROCESS, CATEGORY]
+    reserved_sections:
+        - observation
+        - functions_and_definitions
+        - setup
+        - category
+        - systematics
+        - processes
+
+    #interpreter_keywords:
+        #- INSERT
+
+    process_names: [ggH, ggZZ, qqZZ, zjets]
+    functions_and_definitions:
+        #setup level definitions (observables, mass range, lumi,
+        #whatever is common for all cards)
+        - mass4l[105,140]
+        - mH[125,105,140]
+        - lumi_8[19.712]
+
+
+
+
+#########################################################################################################################################
+
+setup:
+    <<: *COMMON_SETUP
+
+category: 2e2mu  #if not specified, use the key from the top of this dictionary, i.e. '2e2mu'
+observation:
+    rate: 8  #TODO: get it from elswhere
+    source:
+        #path given as a/b/c.root/myrootdir/mytree
+        path: a/b/c.root/mytree
+        #if selection is omitted then select all
+        selection: "passedFullSelection"
+
+functions_and_definitions:
+    #level-0 definitions (mu, sigma, width, ...)
+    - r_2e2mu[1,0,4]  #mu value
+
+
+systematics: INSERT(systematics_8TeV_2e2mu.yaml)
+processes:
+    ggH:
+        is_signal : 1
+        #rate : 4.0230674  #TODO: get it from a dictionary
+        rate : INSERT(yields_8TeV_2e2mu.yaml:ggH)
+        functions_and_definitions:
+            #level-1 definitions (process norm, shape parameters, all related
+            #to this process)
+            - expr::ggH_norm('@0',r_2e2mu)
+            - expr::mean_3_8('INSERT(signal_shape_parametrization_8TeV_2e2mu.yaml:mean)',mass4l)
+            - expr::sigma_3_8('INSERT(signal_shape_parametrization_8TeV_2e2mu.yaml:sigma)',mass4l)
+            - expr::alpha_3_8('0.956',mass4l)
+            - expr::n_3_8('4.713',mass4l)
+            - expr::alpha2_3_8('1.377',mass4l)
+            - expr::n2_3_8('6.2383+(0.318)*(@0-125)',mass4l)
+        shape : "RooDoubleCB::ggH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
+
+    qqZZ:
+        is_signal : 0
+        rate : 7.11430
+        #shape : RooUniform:qqZZ(mass4l)
+        shape : Template::qqZZ(mass4l, XSBackground_qqZZ_2e2mu_mass4l_105.6_140.6.root/m4l_mass4l_105.6_140.6)
+
+
+
+
+
+

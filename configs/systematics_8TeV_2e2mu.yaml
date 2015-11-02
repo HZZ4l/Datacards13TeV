@@ -1,0 +1,21 @@
+lumi:
+    type : lnN
+    ggH : 1.026
+    qqZZ : 1.026
+    ttH : 1.026
+
+cms_zz4l_bkg:
+    type : param 0.0 1 [-3,3]
+
+cms_eff_m:
+    type : lnN
+    ggH : 1.05
+    VBF : 1.03
+    zjets : 1.1
+    qqZZ : 1.01
+
+cms_eff_e:
+    type : lnN
+    ggH : 1.01
+    VBF : 1.05
+    ttH : 1.1
