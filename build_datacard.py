@@ -25,21 +25,21 @@ class DatacardBuilder(object):
     EXAMPLE_____________________________________________________________
     #*** HEADER ***
     imax 1 number of bins
-    jmax 5 number of processes minus 1
-    kmax 14 number of nuisance parameters
-    ----------------------------------------------------------------------------------------------------------------------------------
+    jmax 3 number of processes minus 1
+    kmax 1 number of nuisance parameters
+    --------------------------------------------------------------------------------
     shapes *    ch1  hzz4l_2e2muS_8TeV_xs_SM_125_mass4l_v3.Databin0.root w:$PROCESS
-    ----------------------------------------------------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------
     bin          ch1
     observation  8.0
     #***PER-PROCESS INFORMATION ***
-    ----------------------------------------------------------------------------------------------------------------------------------
-    bin                                   ch1               ch1               ch1               ch1               ch1               ch1
-    process                               trueH2e2muBin0_8  bkg_zjets_8       bkg_ggzz_8        bkg_qqzz_8        out_trueH_8       fakeH_8
-    process                               0                 1                 2                 3                 4                 5
-    rate                                  1.0000            1.0526            0.3174            5.7443            1.0000            0.5684
-    ----------------------------------------------------------------------------------------------------------------------------------
-    CMS_eff_e               lnN           1.046             -                 1.046             1.046             1.046             1.046
+    --------------------------------------------------------------------------------
+    bin         ch1               ch1               ch1               ch1
+    process     trueH2e2muBin0_8  bkg_zjets_8       bkg_ggzz_8        bkg_qqzz_8
+    process     0                 1                 2                 3
+    rate        1.0000            1.0526            0.3174            5.7443
+    --------------------------------------------------------------------------------
+    CMS_eff_e   lnN           1.046             -                 1.046
 
     EXAMPLE_____________________________________________________________
 
@@ -54,7 +54,8 @@ class DatacardBuilder(object):
 
         self.datacard_name = datacard_name
         self.d_input = datacard_input
-        self.log.debug('Datacard: {0} Datacard input: {1}'.format(self.datacard_name, self.d_input))
+        self.log.debug('Datacard: {0} Datacard input: {1}'.format(self.datacard_name,
+                                                                  self.d_input))
 
         #self.not_a_process = ['observation','functions_and_definitions', 'setup']
         self.not_a_process = self.d_input['setup']['reserved_sections']
@@ -119,7 +120,9 @@ class DatacardBuilder(object):
         print txt_card
         file_datacard_name = self.datacard_name+'.txt'
         if self.lumi_scaling != 1.0:
-            file_datacard_name = file_datacard_name.replace('.txt', '.lumi_scale_{0:3.2f}.txt'.format(self.lumi_scaling))
+            file_datacard_name = file_datacard_name.replace('.txt',
+                                                            '.lumi_scale_{0:3.2f}.txt'
+                                                            .format(self.lumi_scaling))
 
         with open(file_datacard_name, 'w') as file_datacard:
             file_datacard.write(textwrap.dedent(txt_card))
@@ -197,9 +200,11 @@ class DatacardBuilder(object):
         """
         self.lumi_scaling = lumi_scaling
         if self.lumi_scaling != 1.0:
-            self.card_header+='Rates in datacard are scaled by a factor of {0}'.format(self.lumi_scaling)
+            self.card_header += 'Rates in datacard are scaled by a factor of {0}'
+                                .format(self.lumi_scaling)
 
-        self.log.debug('Rates in datacards will be scaled by a factor of {0}'.format(self.lumi_scaling))
+        self.log.debug('Rates in datacards will be scaled by a factor of {0}'
+                        .format(self.lumi_scaling))
 
 
     def _get_functions_and_definitions(self,data):
@@ -326,7 +331,8 @@ class DatacardBuilder(object):
         """
         process_lines = {'bin': '', 'name':'', 'number':'', 'rate':'','sys':''}
 
-        signal_process_dict = dict(enumerate(self.signal_process_list, start=-(len(self.signal_process_list)-1)))
+        signal_process_dict = dict(enumerate(self.signal_process_list,
+                                             start=-(len(self.signal_process_list)-1)))
         bkg_process_dict    = dict(enumerate(self.bkg_process_list, start=1))
 
 
@@ -343,7 +349,8 @@ class DatacardBuilder(object):
             process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
-            process_lines['rate']   += ( delimiter + str(float(p_setup['rate'])  * self.lumi_scaling) )
+            process_lines['rate']   += ( delimiter + str(float(p_setup['rate'])  *
+                                                         self.lumi_scaling) )
             process_lines['sys']     = "#systematics line: not implemented yet!!!"
 
         for p_number in sorted(bkg_process_dict.keys()):
@@ -357,7 +364,8 @@ class DatacardBuilder(object):
             process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
-            process_lines['rate']   += ( delimiter + str(float(p_setup['rate']) * self.lumi_scaling) )
+            process_lines['rate']   += ( delimiter + str(float(p_setup['rate']) *
+                                                         self.lumi_scaling) )
             process_lines['sys']     = "#systematics line: not implemented yet!!!"
 
 
@@ -396,8 +404,8 @@ class DatacardBuilder(object):
             systematics_lines_list.append('{0} {1} {2}'.format(sys_id,
                                                                sys_dict[sys_id]['type'],
                                                                string.join(values,' ') ))
-
-            self.log.debug('Systematic line: {0} '.format(systematics_lines_list[-1]))        #show the last one
+            #show the last one
+            self.log.debug('Systematic line: {0} '.format(systematics_lines_list[-1]))
 
 
         systematics_lines = ''
@@ -439,7 +447,8 @@ def parseOptions():
 def main():
     parseOptions()
     #read configuration
-    os.environ['PYTHON_LOGGER_VERBOSITY'] =  str(opt.verbosity) #will be checked/used by all Loggers
+    #set the verbosity at all levels (all Loggers)
+    os.environ['PYTHON_LOGGER_VERBOSITY'] =  str(opt.verbosity)
     cfg_reader = UniversalConfigParser(file_list = opt.config_filename)
     pp = pprint.PrettyPrinter(indent=4)
     full_config = cfg_reader.get_dict()
@@ -452,11 +461,6 @@ def main():
         #datacard_builder.make_txt_card()
         #datacard_builder.make_workspace()
 
-    filename_full_cfg = os.path.join('full_configs/',os.path.basename(opt.config_filename))
-    filename_full_cfg = os.path.splitext(filename_full_cfg)[0]
-    cfg_reader.dump_to_yaml(filename_full_cfg+'.yaml', full_config)
-    cfg_reader.dump_to_json(filename_full_cfg+'.yaml', full_config)
-
     datacard_name = opt.config_filename.rstrip('.yaml')
     datacard_builder = DatacardBuilder(datacard_name = datacard_name ,
                                         datacard_input = full_config)
@@ -464,6 +468,14 @@ def main():
     datacard_builder.scale_lumi_by(opt.scale_lumi_by)
     datacard_builder.make_txt_card()
     datacard_builder.make_workspace()
+
+    #dump the final cnfiguration to yaml,json (will be used to display as webage)
+    filename_full_cfg = os.path.join('full_configs/',os.path.basename(opt.config_filename))
+    filename_full_cfg = os.path.splitext(filename_full_cfg)[0]
+    cfg_reader.dump_to_yaml(filename_full_cfg+'.yaml', full_config)
+    cfg_reader.dump_to_json(filename_full_cfg+'.json', full_config)
+
+
 
 
 
