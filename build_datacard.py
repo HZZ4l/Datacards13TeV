@@ -134,10 +134,9 @@ class DatacardBuilder(object):
         - define shapes
         - fetch dataset from root-trees
         """
-
-        #gSystem.AddIncludePath("-I$CMSSW_BASE/src/ ")
+        #we need this for some pdf functions, e.g. RooDoubleCB whic doesn't exist
+        #in plane RooFit
         gSystem.Load("$CMSSW_BASE/lib/slc5_amd64_gcc472/libHiggsAnalysisCombinedLimit.so")
-        #gSystem.AddIncludePath("-I$ROOFITSYS/include")
 
         self.w = RooWorkspace('w')
         #run all functions_and_definitions:
@@ -185,8 +184,8 @@ class DatacardBuilder(object):
             print 20*"----"
             self.w.Print()
             print 20*"----"
-        self.w.writeToFile(self.shapes_output_file)
-        self.log.debug('Datacard workspace written to {0}'.format(self.shapes_output_file))
+        self.w.writeToFile(self.workspace_file)
+        self.log.debug('Datacard workspace written to {0}'.format(self.workspace_file))
 
 
     def scale_lumi_by(self, lumi_scaling):
@@ -233,14 +232,16 @@ class DatacardBuilder(object):
             else:
                 if self.d_input['processes'][p]['shape']:
                     self.shapes_exist = True
-                    self.shapes_output_file = "{0}.input.root".format(self.datacard_name)
+                    self.workspace_file = "{0}.input.root".format(self.datacard_name)
                     if self.lumi_scaling != 1.0:
-                        self.shapes_output_file = self.shapes_output_file.replace('input','lumi_scale_{0:3.2f}.input'.format(self.lumi_scaling))
+                        self.workspace_file = self.workspace_file.replace('input',
+                                                                        'lumi_scale_{0:3.2f}.input'
+                                                                        .format(self.lumi_scaling))
                     break
 
         if self.shapes_exist:
             return "shapes *    cat_{0}  {1} w:$PROCESS".format(self.datacard_name,
-                                                                self.shapes_output_file)
+                                                                self.workspace_file)
         else:
             return "#shapes are not used - counting experiment card"
 
@@ -392,7 +393,9 @@ class DatacardBuilder(object):
                 values.append(str(value))
 
             if sys_dict[sys_id]['type'].startswith('param'): values=[]
-            systematics_lines_list.append('{0} {1} {2}'.format(sys_id, sys_dict[sys_id]['type'],string.join(values,' ') ))
+            systematics_lines_list.append('{0} {1} {2}'.format(sys_id,
+                                                               sys_dict[sys_id]['type'],
+                                                               string.join(values,' ') ))
 
             self.log.debug('Systematic line: {0} '.format(systematics_lines_list[-1]))        #show the last one
 
