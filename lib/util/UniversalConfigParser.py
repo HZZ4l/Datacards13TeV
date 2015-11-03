@@ -21,6 +21,7 @@ class UniversalConfigParser(object):
 	self.cfg_dict = {}
 
 
+
     def _get_cfg_type(self,file_name):
 
 	if self.cfg_type == None :
@@ -88,6 +89,8 @@ class UniversalConfigParser(object):
 	    """
 	    We want to append dictionaries from all the config files.
 	    """
+	    self.this_cfg_dir = os.path.dirname(os.path.abspath(cfg_file))
+
 	    if self.cfg_type == None: self.cfg_type = self._get_cfg_type(cfg_file)
 	    self.log.debug('Updating dictionary from config file in the order provided: %s',str(cfg_file) )
 	    if self.cfg_type.lower() in ['yaml', "yml"]: self._get_dict_yaml(cfg_file)
@@ -178,7 +181,13 @@ class UniversalConfigParser(object):
                     inputs = tok.split(':')
                     filename = inputs[0]
                     keys = inputs[1:]
+                    self.log.debug('filename = {0} keys={1}'.format(filename, keys))
                     if filename!='THIS_CONFIG':
+                        self.log.debug('filename = {0} keys={1} this_cfg_dir={2}'
+                            .format(filename, keys, self.this_cfg_dir))
+                        filename = os.path.join(self.this_cfg_dir,
+                                                os.path.dirname(filename),
+                                                os.path.basename(filename))
                         another_cfg_reader = UniversalConfigParser(cfg_type="YAML",
                                                                    file_list = filename)
                         full_config = another_cfg_reader.get_dict()

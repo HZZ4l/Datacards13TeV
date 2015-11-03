@@ -135,9 +135,9 @@ class DatacardBuilder(object):
         - fetch dataset from root-trees
         """
 
-        gSystem.AddIncludePath("-I$CMSSW_BASE/src/ ")
+        #gSystem.AddIncludePath("-I$CMSSW_BASE/src/ ")
         gSystem.Load("$CMSSW_BASE/lib/slc5_amd64_gcc472/libHiggsAnalysisCombinedLimit.so")
-        gSystem.AddIncludePath("-I$ROOFITSYS/include")
+        #gSystem.AddIncludePath("-I$ROOFITSYS/include")
 
         self.w = RooWorkspace('w')
         #run all functions_and_definitions:
@@ -449,9 +449,10 @@ def main():
         #datacard_builder.make_txt_card()
         #datacard_builder.make_workspace()
 
-    cfg_reader.dump_to_yaml('full_configs/'+opt.config_filename, full_config)
-    cfg_reader.dump_to_json('full_configs/'+opt.config_filename.replace('yaml','json'),
-                            full_config)
+    filename_full_cfg = os.path.join('full_configs/',os.path.basename(opt.config_filename))
+    filename_full_cfg = os.path.splitext(filename_full_cfg)[0]
+    cfg_reader.dump_to_yaml(filename_full_cfg+'.yaml', full_config)
+    cfg_reader.dump_to_json(filename_full_cfg+'.yaml', full_config)
 
     datacard_name = opt.config_filename.rstrip('.yaml')
     datacard_builder = DatacardBuilder(datacard_name = datacard_name ,
