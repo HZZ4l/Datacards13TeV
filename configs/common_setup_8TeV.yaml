@@ -1,0 +1,26 @@
+
+INFO: |
+    - datacard inputs per category (final state) and then split to subrprocesses
+    - this is a test configuration
+
+COMMON_SETUP: &COMMON_SETUP
+    words_to_be_replaced: [SQRTS, PROCESS, CATEGORY]
+    reserved_sections:
+        - observation
+        - functions_and_definitions
+        - setup
+        - category
+        - systematics
+        - processes
+
+    #interpreter_keywords:
+        #- INSERT
+
+    process_names: [ggH, ggZZ, qqZZ, zjets]
+    functions_and_definitions:
+        #setup level definitions (observables, mass range, lumi,
+        #whatever is common for all cards)
+        - mass4l[105,140]
+        - mH[125,105,140]
+        - lumi_8[19.712]
+
