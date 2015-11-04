@@ -17,6 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardi
 from lib.util.Logger import *
 from lib.util.UniversalConfigParser import UniversalConfigParser
 from lib.RootHelpers.RootHelperBase import RootHelperBase
+from lib.RooFit.ToyDataSetManager import ToyDataSetManager
 
 class DatacardBuilder(object):
     """
@@ -178,8 +179,20 @@ class DatacardBuilder(object):
         self.log.debug('Printing workspace...')
 
         #get the RooDataset
-        self.data_obs = self.w.pdf('ggH').generate(RooArgSet(self.w.var('mass4l')),
-                                                   self._get_observed_rate())
+        #self.data_obs = self.w.pdf('ggH').generate(RooArgSet(self.w.var('mass4l')),
+                                                   #self._get_observed_rate())
+
+        dataset_tool = ToyDataSetManager()
+        self.data_obs  = dataset_tool.get_dataset_from_tree(
+                            self.d_input['observation']['source']['path'],
+                            tree_variables = self.d_input['observation']['source']['branches'],
+                            weight = "1==1",
+                            weight_var_name=0,
+                            dataset_name = "data_obs",
+                            basket=False,
+                            category = None)
+        assert self._get_observed_rate()==self.data_obs.sumEntries(), ('Mismatch between '
+                'obervation in txt datacard and sum of entries in RooDataSet::data_obs')
 
         self.data_obs.SetNameTitle('data_obs','data_obs')
         getattr(self.w,'import')(self.data_obs)
@@ -200,8 +213,8 @@ class DatacardBuilder(object):
         """
         self.lumi_scaling = lumi_scaling
         if self.lumi_scaling != 1.0:
-            self.card_header += 'Rates in datacard are scaled by a factor of {0}'
-                                .format(self.lumi_scaling)
+            self.card_header += ('Rates in datacard are scaled by a factor of {0}'
+                                 .format(self.lumi_scaling))
 
         self.log.debug('Rates in datacards will be scaled by a factor of {0}'
                         .format(self.lumi_scaling))
@@ -245,18 +258,21 @@ class DatacardBuilder(object):
                     break
 
         if self.shapes_exist:
-            return "shapes *    cat_{0}  {1} w:$PROCESS".format(self.datacard_name,
+            return "shapes *    cat_{0}  {1} w:$PROCESS".format(self.d_input['category'],
                                                                 self.workspace_file)
         else:
             return "#shapes are not used - counting experiment card"
 
-    def _get_template(self, shape_setup):
+    def _get_template(self, shape_setup, new_template_name=None):
         """Get template from histogram and make it RooHistPdf.
         """
         self.log.debug('Creating RooHistPdf from given histogram.')
         all_matches = re.findall("Template::(.+?)\((.+?)\)",shape_setup)
 
-        template_name = all_matches[0][0].strip()
+        if new_template_name:
+            template_name = new_template_name
+        else:
+            template_name = all_matches[0][0].strip()
         template_args = [arg.strip() for arg in all_matches[0][1].split(',')]
         assert len(template_args)>1, ('Templates need to be provided in the form: '
                                       'Template::name(obs1,[obs2,obs3], a/b/c.root/hist)')
@@ -298,10 +314,10 @@ class DatacardBuilder(object):
                                     ras_observables,
                                     roo_data_hist)
 
+
         getattr(self.w,'import')(roo_hist_pdf)
 
         return self.w.pdf(roo_hist_pdf.GetName())
-
 
 
 
@@ -346,7 +362,7 @@ class DatacardBuilder(object):
                 is_first = False
             p_name = signal_process_dict[p_number]
             p_setup = self.d_input['processes'][p_name]
-            process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
+            process_lines['bin']    += ( delimiter + 'cat_' + str(self.d_input['category']))
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
             process_lines['rate']   += ( delimiter + str(float(p_setup['rate'])  *
@@ -361,7 +377,7 @@ class DatacardBuilder(object):
                 is_first = False
             p_name = bkg_process_dict[p_number]
             p_setup = self.d_input['processes'][p_name]
-            process_lines['bin']    += ( delimiter + 'cat_' + str(self.datacard_name) )
+            process_lines['bin']    += ( delimiter + 'cat_' + str(self.d_input['category']))
             process_lines['name']   += ( delimiter + str(p_name) )
             process_lines['number'] += ( delimiter + str(p_number) )
             process_lines['rate']   += ( delimiter + str(float(p_setup['rate']) *
@@ -461,7 +477,7 @@ def main():
         #datacard_builder.make_txt_card()
         #datacard_builder.make_workspace()
 
-    datacard_name = opt.config_filename.rstrip('.yaml')
+    datacard_name = os.path.basename(opt.config_filename).rstrip('.yaml')
     datacard_builder = DatacardBuilder(datacard_name = datacard_name ,
                                         datacard_input = full_config)
     pp.pprint(full_config)
