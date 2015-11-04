@@ -2,14 +2,13 @@
 
 setup: INSERT(common_setup_8TeV.yaml:COMMON_SETUP)
 
-category: 2e2mu  #if not specified, use the key from the top of this dictionary, i.e. '2e2mu'
+category: 2e2mu
 observation:
-    rate: 8  #TODO: get it from elswhere
+    rate: 8
     source:
         #path given as a/b/c.root/myrootdir/mytree
         path: configs/inputs/data_observed_8TeV.root/passedEvents
-        #if selection is omitted then select all
-        selection: "(mass2e2mu>105.0 && mass2e2mu<140.0)"
+        selection: (mass2e2mu>105.0 && mass2e2mu<140.0)
         branches:
             - mass4l
 
@@ -17,8 +16,8 @@ functions_and_definitions:
     #level-0 definitions (mu, sigma, width, ...)
     - r_2e2mu[1,0,4]  #mu value
 
-
 systematics: INSERT(inputs/systematics_8TeV_2e2mu.yaml)
+
 processes:
     ggH:
         is_signal : 1
@@ -35,19 +34,22 @@ processes:
             - expr::alpha2_3_8('1.377',mass4l)
             - expr::n2_3_8('6.2383+(0.318)*(@0-125)',mass4l)
         shape : &ggH_shape "RooDoubleCB::ggH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
-
+        systematics: #TODO
+            one_extra_sys_ggH: lnN 1.03
+            another_extra_sys_ggH: param 0.0 1 [-3,3]
     qqH:
         is_signal : 1
-        #rate : 4.0230674  #TODO: get it from a dictionary
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:qqH:0)
-        functions_and_definitions: *ggH_definitions
+        functions_and_definitions:
+            - <<:*ggH_definitions
+            - expr::qqH_norm('@0',r_2e2mu)
         shape : "RooDoubleCB::qqH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
 
     qqZZ:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:qqZZ:0)
-        #shape : RooUniform:qqZZ(mass4l)
         shape : Template::qqZZ(mass4l, configs/inputs/qqZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
+
     ggZZ:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:ggZZ:0)
