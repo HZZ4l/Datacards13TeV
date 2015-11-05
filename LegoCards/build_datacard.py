@@ -226,13 +226,21 @@ class DatacardBuilder(object):
         Checks if 'data' contains key 'functions_and_definitions' and returns
         list of those to be defined.
         """
+
         try:
-            return data['functions_and_definitions']
+            data['functions_and_definitions']
         except KeyError:
             self.log.debug(('This section of configuration has no '
                 'functions_and_definitions defined. '
                 'Returning empty list. Section={0}'.format(data)))
             return []
+        else:
+            new_fnd_list = []
+            self._flatten_list(input_list = data['functions_and_definitions'],
+                               output_list = new_fnd_list)
+            data['functions_and_definitions'] = new_fnd_list
+            self.log.debug('functions_and_definitions: {0}'.format(new_fnd_list))
+            return data['functions_and_definitions']
 
 
 
@@ -431,6 +439,19 @@ class DatacardBuilder(object):
             systematics_lines += '\n'
             n_systematics += 1
         return (n_systematics, systematics_lines)
+
+    def _flatten_list(self, input_list, output_list):
+        """Flatten list of lists of lists of lists ...
+
+        In config files nested lists can be produced due to referencing in
+        yaml using '&ANCHOR'and '*ANCHOR'. This function flattens such list.
+        """
+        for it in input_list:
+            if not hasattr(it, '__iter__'):
+                output_list.append(it)
+            else:
+                print 'it=', it
+                self._flatten_list(it, output_list)
 
 
 

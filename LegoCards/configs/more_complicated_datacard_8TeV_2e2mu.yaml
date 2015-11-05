@@ -27,12 +27,12 @@ processes:
             #level-1 definitions (process norm, shape parameters, all related
             #to this process)
             - expr::ggH_norm('@0',r_2e2mu)
-            - expr::mean_3_8('INSERT(inputs/signal_shape_parametrization_8TeV_2e2mu.yaml:mean)',mass4l)
-            - expr::sigma_3_8('INSERT(inputs/signal_shape_parametrization_8TeV_2e2mu.yaml:sigma)',mass4l)
-            - expr::alpha_3_8('0.956',mass4l)
-            - expr::n_3_8('4.713',mass4l)
-            - expr::alpha2_3_8('1.377',mass4l)
-            - expr::n2_3_8('6.2383+(0.318)*(@0-125)',mass4l)
+            - expr::mean_3_8('INSERT(inputs/signal_shape_parametrization_8TeV_2e2mu.yaml:mean)',MH)
+            - expr::sigma_3_8('INSERT(inputs/signal_shape_parametrization_8TeV_2e2mu.yaml:sigma)',MH)
+            - expr::alpha_3_8('0.956',MH)
+            - expr::n_3_8('4.713',MH)
+            - expr::alpha2_3_8('1.377',MH)
+            - expr::n2_3_8('6.2383+(0.318)*(@0-125)',MH)
         shape : &ggH_shape "RooDoubleCB::ggH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
         systematics: #TODO
             one_extra_sys_ggH: lnN 1.03
@@ -41,8 +41,8 @@ processes:
         is_signal : 1
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:qqH:0)
         functions_and_definitions:
-            - <<:*ggH_definitions
             - expr::qqH_norm('@0',r_2e2mu)
+            - *ggH_definitions
         shape : "RooDoubleCB::qqH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
 
     qqZZ:
@@ -53,17 +53,10 @@ processes:
     ggZZ:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:ggZZ:0)
-        #shape : RooUniform:qqZZ(mass4l)
         shape : Template::ggZZ(mass4l, configs/inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
 
     zjets:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:zjets:0)
-        #shape : RooUniform:qqZZ(mass4l)
         shape : Template::zjets(mass4l, configs/inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
-
-
-
-
-
 

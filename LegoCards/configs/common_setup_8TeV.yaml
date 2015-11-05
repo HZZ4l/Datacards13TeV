@@ -21,6 +21,6 @@ COMMON_SETUP: &COMMON_SETUP
         #setup level definitions (observables, mass range, lumi,
         #whatever is common for all cards)
         - mass4l[105,140]
-        - mH[125,105,140]
+        - MH[125,105,140]
         - lumi_8[19.712]
 
