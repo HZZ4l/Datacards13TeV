@@ -1,0 +1,105 @@
+lumi:
+    type: lnN
+    Untagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    OneJetTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VBFTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHLeptTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHHadrTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    ttHTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+
+cms_zz4l_bkg:
+    type : param 0.0 1 [-3,3]
+
+cms_eff_m:
+    type : lnN
+    Untagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+    OneJetTagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+    VBFTagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+    VHLeptTagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+    VHHadrTagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+    ttHTagged: 
+        ggH: 1.043
+        qqH: 1.043
+        WH: 1.043
+        ZH: 1.043
+        ttH: 1.043
+        qqZZ: 1.043
+        ggZZ: 1.043
+

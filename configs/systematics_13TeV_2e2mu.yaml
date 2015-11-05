@@ -1,0 +1,156 @@
+lumi:
+    type: lnN
+    Untagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    OneJetTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VBFTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHLeptTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHHadrTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    ttHTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+
+cms_zz4l_bkg:
+    type : param 0.0 1 [-3,3]
+
+cms_eff_m:
+    type : lnN
+    Untagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    OneJetTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VBFTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHLeptTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    VHHadrTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    ttHTagged: 
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+
+cms_eff_e:
+    type : lnN
+    Untagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+    OneJetTagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+    VBFTagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+    VHLeptTagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+    VHHadrTagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+    ttHTagged: 
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+
