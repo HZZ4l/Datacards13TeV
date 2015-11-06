@@ -1,21 +1,67 @@
 lumi:
-    type : lnN
-    ggH : 1.026
-    qqZZ : 1.026
-    ttH : 1.026
+    type: lnN
+    UnTagged: &lumi_untagged
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+    OneJetTagged:
+        <<: *lumi_untagged
+    VBFTagged:
+        <<: *lumi_untagged
+    VHLeptTagged:
+        <<: *lumi_untagged
+    VHHadrTagged:
+        <<: *lumi_untagged
+    ttHTagged:
+        <<: *lumi_untagged
 
 cms_zz4l_bkg:
     type : param 0.0 1 [-3,3]
 
 cms_eff_m:
     type : lnN
-    ggH : 1.05
-    VBF : 1.03
-    zjets : 1.1
-    qqZZ : 1.01
+    UnTagged: &eff_m_untagged
+        ggH: 1.026
+        qqH: 1.026
+        WH: 1.026
+        ZH: 1.026
+        ttH: 1.026
+        qqZZ: 1.026
+        ggZZ: 1.026
+
+    OneJetTagged:
+        <<: *eff_m_untagged
+    VBFTagged:
+        <<: *eff_m_untagged
+    VHLeptTagged:
+        <<: *eff_m_untagged
+    VHHadrTagged:
+        <<: *eff_m_untagged
+    ttHTagged:
+        <<: *eff_m_untagged
 
 cms_eff_e:
     type : lnN
-    ggH : 1.01
-    VBF : 1.05
-    ttH : 1.1
+    UnTagged: &eff_e_untagged
+        ggH: 1.046
+        qqH: 1.046
+        WH: 1.046
+        ZH: 1.046
+        ttH: 1.046
+        qqZZ: 1.046
+        ggZZ: 1.046
+
+    OneJetTagged:
+        <<: *eff_e_untagged
+    VBFTagged:
+        <<: *eff_e_untagged
+    VHLeptTagged:
+        <<: *eff_e_untagged
+    VHHadrTagged:
+        <<: *eff_e_untagged
+    ttHTagged:
+        <<: *eff_e_untagged

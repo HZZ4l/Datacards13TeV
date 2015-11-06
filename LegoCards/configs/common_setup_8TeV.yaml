@@ -16,11 +16,9 @@ COMMON_SETUP: &COMMON_SETUP
     #interpreter_keywords:
         #- INSERT
 
-    process_names: [ggH, ggZZ, qqZZ, zjets]
+    process_names: [ggH, qqH, WH, ZH, ttH, ggZZ, qqZZ, zjets]
     functions_and_definitions:
         #setup level definitions (observables, mass range, lumi,
         #whatever is common for all cards)
-        - mass4l[105,140]
-        - MH[125,105,140]
         - lumi_8[19.712]
 
