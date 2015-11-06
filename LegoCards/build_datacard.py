@@ -19,7 +19,7 @@ from lib.util.UniversalConfigParser import UniversalConfigParser
 from lib.RootHelpers.RootHelperBase import RootHelperBase
 from lib.RooFit.ToyDataSetManager import ToyDataSetManager
 
-class DatacardBuilder(object):
+class LegoCards(object):
     """
     Class for building datacards, both textual and workspace part
 
@@ -492,14 +492,14 @@ def main():
 
     #categories = opt.category.split(',')
     #for cat in categories:
-        #datacard_builder = DatacardBuilder(datacard_name = cat , datacard_input = full_config[cat])
+        #datacard_builder = LegoCards(datacard_name = cat , datacard_input = full_config[cat])
         #pp.pprint(full_config[cat])
         #datacard_builder.scale_lumi_by(opt.scale_lumi_by)
         #datacard_builder.make_txt_card()
         #datacard_builder.make_workspace()
 
     datacard_name = os.path.basename(opt.config_filename).rstrip('.yaml')
-    datacard_builder = DatacardBuilder(datacard_name = datacard_name ,
+    datacard_builder = LegoCards(datacard_name = datacard_name ,
                                         datacard_input = full_config)
     pp.pprint(full_config)
     datacard_builder.scale_lumi_by(opt.scale_lumi_by)
