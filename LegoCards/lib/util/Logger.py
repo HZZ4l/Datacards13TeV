@@ -49,7 +49,7 @@ class Logger(object):
     FORMAT_STR = '------- %(name)-12s : %(levelname)-8s :  %(message)s'
     FORMAT = "------- $BOLD%(name)-12s$RESET : %(levelname)-8s : %(message)s ------- (in file $BOLD%(filename)s$RESET : %(lineno)d)"
     COLOR_FORMAT = formatter_message(FORMAT, True)
-    
+
     def setVerbose(self, logger, verbose=0):
         """Set level of verbosity with integer:
            <1  = very quiet
@@ -60,8 +60,8 @@ class Logger(object):
         my_level = 51 - int(verbose*10)
         self.level = my_level
         logger.setLevel(my_level)
-        
-      
+
+
     def getLevel(self, level):
         if level is None: return
         try: level = int(level)
@@ -71,11 +71,13 @@ class Logger(object):
             print 'warning: console log level ', level, ' not in range 1..50.'
             return
         return level
-        
+
     def is_debug(self):
-        print 'info: you are running in mode DEBUG =', (self.logger.getEffectiveLevel()<20)
-        return (self.logger.getEffectiveLevel()<20)
-        
+        debug = self.logger.getEffectiveLevel()<20
+        if debug:
+            print 'info: you are running in mode DEBUG =', debug
+        return debug
+
     def setLevel(self, level):
         if level is None: return
         try: level = int(level)
@@ -96,17 +98,17 @@ class Logger(object):
         if os.getenv('PYTHON_LOGGER_VERBOSITY'):
             #print "PYTHON_LOGGER_VERBOSITY is set to :", int(os.getenv('PYTHON_LOGGER_VERBOSITY'))
             self.setVerbose(self.logger, int(os.getenv('PYTHON_LOGGER_VERBOSITY')) )
-            
+
         else:
             self.level = self.getLevel(level)
             self.logger.setLevel(level)
         self.formatter = ColoredFormatter(self.COLOR_FORMAT)
-        
-        #check if there is already a handler for this logger to avoid mltiplication of log lines. 
-        if self.logger.handlers != []: 
+
+        #check if there is already a handler for this logger to avoid mltiplication of log lines.
+        if self.logger.handlers != []:
             return self.logger
-        
-        
+
+
         # Add FileHandler
         if log_file is not None:
             self.fh = logging.FileHandler(self.LOG_FILE)
@@ -120,8 +122,7 @@ class Logger(object):
             #ch.level = level
             self.ch.formatter = self.formatter
             self.logger.addHandler(self.ch)
-            
+
         return self.logger
 
-        
-        
+

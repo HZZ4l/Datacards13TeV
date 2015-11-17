@@ -1,6 +1,6 @@
 lumi:
-    type: lnN
     UnTagged: &lumi_untagged
+        type: lnN
         ggH: 1.026
         qqH: 1.026
         WH: 1.026
@@ -20,11 +20,24 @@ lumi:
         <<: *lumi_untagged
 
 cms_zz4l_bkg:
-    type : param 0.0 1 [-3,3]
+    UnTagged: &cms_zz4l_bkg_untagged
+        type : param 0.0 1 [-3,3]
+    OneJetTagged:
+        <<: *cms_zz4l_bkg_untagged
+    VBFTagged:
+        <<: *cms_zz4l_bkg_untagged
+    VHLeptTagged:
+        <<: *cms_zz4l_bkg_untagged
+    VHHadrTagged:
+        <<: *cms_zz4l_bkg_untagged
+    ttHTagged:
+        <<: *cms_zz4l_bkg_untagged
+
+    
 
 cms_eff_m:
-    type : lnN
     UnTagged: &eff_m_untagged
+        type : lnN
         ggH: 1.026
         qqH: 1.026
         WH: 1.026
@@ -45,8 +58,9 @@ cms_eff_m:
         <<: *eff_m_untagged
 
 cms_eff_e:
-    type : lnN
+
     UnTagged: &eff_e_untagged
+        type : lnN
         ggH: 1.046
         qqH: 1.046
         WH: 1.046
@@ -65,3 +79,48 @@ cms_eff_e:
         <<: *eff_e_untagged
     ttHTagged:
         <<: *eff_e_untagged
+
+hzz_pdf:
+    UnTagged: &pdf_untagged
+        type: lnN
+        ggH: 1.041
+        qqH: 1.041
+        WH: 1.041
+        ZH: 1.041
+        ttH: 1.041
+        qqZZ: 1.041
+        ggZZ: 1.041
+    OneJetTagged:
+        <<: *pdf_untagged
+    VBFTagged:
+        <<: *pdf_untagged
+    VHLeptTagged:
+        <<: *pdf_untagged
+    VHHadrTagged:
+        <<: *pdf_untagged
+    ttHTagged:
+        <<: *pdf_untagged
+
+hzz_BR:
+    UnTagged: &BR_untagged
+        type : lnN
+        ggH: 1.041
+        qqH: 1.041
+        WH: 1.041
+        ZH: 1.041
+        ttH: 1.041
+        qqZZ: 1.041
+        ggZZ: 1.041
+
+    OneJetTagged:
+        <<: *BR_untagged
+    VBFTagged:
+        <<: *BR_untagged
+    VHLeptTagged:
+        <<: *BR_untagged
+    VHHadrTagged:
+        <<: *BR_untagged
+    ttHTagged:
+        <<: *BR_untagged
+
+

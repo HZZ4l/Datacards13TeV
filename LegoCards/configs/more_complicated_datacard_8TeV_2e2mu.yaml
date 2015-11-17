@@ -7,18 +7,23 @@ observation:
     rate: 8
     source:
         #path given as a/b/c.root/myrootdir/mytree
-        path: configs/inputs/data_observed_8TeV.root/passedEvents
+        #path: inputs/data_observed_8TeV.root/passedEvents
+        path: inputs/data_observed_8TeV.root/passedEvents
         selection: (mass2e2mu>105.0 && mass2e2mu<140.0)
-        branches:
-            - mass4l
+        observables:
+        #the observables names correspond to branches in tree
+        #and are interpreted with RooWSFactory. This list is first to be defined.
+            - mass4l[INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:mass_range)]
+            #- mass4l
 
 functions_and_definitions:
     #level-0 definitions (mu, sigma, width, ...)
     - MH[125,105,140]
-    - mass4l[INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:mass_range)]
     - r_2e2mu[1,0,4]  #mu value
 
-systematics: INSERT(inputs/systematics_8TeV_2e2mu.yaml)
+systematics: #INSERT(inputs/systematics_8TeV_2e2mu.yaml:*:UnTagged:*:*)
+    - INSERT(inputs/systematics_8TeV_2e2mu.yaml:*:UnTagged:*:*)
+    - INSERT(inputs/systematics_theory_8TeV_2e2mu.yaml:*:UnTagged:*:*)
 
 processes:
     ggH:
@@ -46,19 +51,23 @@ processes:
             - expr::qqH_norm('@0',r_2e2mu)
             - *ggH_definitions
         shape : "RooDoubleCB::qqH(mass4l, mean_3_8, sigma_3_8, alpha_3_8, n_3_8, alpha_3_8, n2_3_8)"
+        systematics:
+            one_extra_sys_ggH: lnN 1.99999
+            another_extra_sys_ggH: param 0.0 1 [-9999,9999]
+            lumi: lnN 2.00
 
     qqZZ:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:UnTagged:qqZZ)
-        shape : Template::qqZZ(mass4l, configs/inputs/qqZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
+        shape : Template::qqZZ(mass4l, inputs/qqZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
 
     ggZZ:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:UnTagged:ggZZ)
-        shape : Template::ggZZ(mass4l, configs/inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
+        shape : Template::ggZZ(mass4l, inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
 
     zjets:
         is_signal : 0
         rate : INSERT(inputs/yields_per_tag_category_13TeV_2e2mu.yaml:UnTagged:zjets)
-        shape : Template::zjets(mass4l, configs/inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
+        shape : Template::zjets(mass4l, inputs/ggZZ_2e2mu_mass4l.root/m4l_mass4l_105.6_140.6)
 

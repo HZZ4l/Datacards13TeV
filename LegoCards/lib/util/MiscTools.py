@@ -23,7 +23,7 @@ def processCmd(cmd, verbose=True):
 |_| \_\\\\__,_|_| |_|_| |_|_|_| |_|\__, | |___/_| |_|\___|_|_|  \___|_| |_| |_|\__,_(_)
                                  |___/
                 """
-    
+
         print figlet_run
         print cmd
         print get_terminal_width()*"_"
@@ -41,7 +41,7 @@ def processCmd(cmd, verbose=True):
             print
             print "Done with exit code = 0: ",cmd
             print
-        
+
             print "     __          _                  "
             print "    / /       __| | ___  _ __   ___ "
             print "__ / /       / _` |/ _ \| '_ \ / _ \\"
@@ -75,13 +75,13 @@ def make_sure_path_exists(path) :
             raise
 
 
-def force_symlink(file1, file2):
+def force_symlink(source, link_name):
     try:
-        os.symlink(file1, file2)
+        os.symlink(source, link_name)
     except OSError, e:
         if e.errno == errno.EEXIST:
-            os.remove(file2)
-            os.symlink(file1, file2)
+            os.remove(link_name)
+            os.symlink(source, link_name)
 
 
 def grep(what, where_list):
@@ -225,24 +225,39 @@ def get_ranges(n_entries, n_ranges, first=0):
 def figlet_boxes(text, figlet=True, figlet_opt="-t", boxes=False, boxes_opt="-d shell"):
     """
     Prints figlet style messages like:
-     _____ _       _      _   
-    |  ___(_) __ _| | ___| |_ 
+     _____ _       _      _
+    |  ___(_) __ _| | ___| |_
     | |_  | |/ _` | |/ _ \ __|
-    |  _| | | (_| | |  __/ |_ 
+    |  _| | | (_| | |  __/ |_
     |_|   |_|\__, |_|\___|\__|
-              |___/            
+              |___/
     - figlet=True the figlet will be drawn.
     - boxes=True the box will be drawn around the text.
     """
-    
+
     figlet_cmd=""
     if figlet:
         figlet_cmd+=("| figlet "+figlet_opt)
-        
+
     boxes_cmd=""
     if boxes:
         boxes_cmd+=("| boxes "+boxes_opt)
-        
+
     processCmd("echo {0} {1} {2}".format(text,figlet_cmd,boxes_cmd), False)
-    
-    
+
+
+
+def flatten_list(input_list, output_list):
+    """Flatten list of lists of lists of lists into a simple list.
+
+    [1,2,[3,4,[5,6]]] becomes [1,2,3,4,5,6]
+    Note: output_list needs to be initialized.
+    """
+    for it in input_list:
+        if not hasattr(it, '__iter__'):
+            output_list.append(it)
+        else:
+            print 'it=', it
+            flatten_list(it, output_list)
+
+

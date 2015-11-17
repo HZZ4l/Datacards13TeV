@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 
-#-----------------------------------------------
+#-------------------------------------------------------------------------------
 # Author:   Roko Plestina (IHEP-CAS),
 #           2013-2014
 # Purpose:
 #    - basic manipulation with files, root objects ...
 #    - pick any object from path, change it and then dump to a file
-#-----------------------------------------------
-import sys, os
-import optparse
-import pprint
-import copy
-import string
-#from array import array
-from ROOT import *
-import collections
+#-------------------------------------------------------------------------------
+
+import sys, os, pprint, copy, string, collections
+from ROOT import TFile, TTree, TChain, TH1, TH2, TH3
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)))
-from lib.util.Logger import *
+from lib.util.Logger import Logger
 import lib.util.MiscTools as misc
-#from  lib.util.UniversalConfigParser import UniversalConfigParser
 
 
 class RootHelperBase(object):
@@ -33,9 +27,10 @@ class RootHelperBase(object):
     """
 
     def __init__(self):
-        self.log = Logger().getLogger(self.__class__.__name__, 10)
+        self.my_logger = Logger()
+        self.log = self.my_logger.getLogger(self.__class__.__name__, 10)
+        self.DEBUG = self.my_logger.is_debug()
         self.pp = pprint.PrettyPrinter(indent=4)
-        self.DEBUG = True
 
     def check_in_opened_files_table(self, file_name,access):
         """
@@ -315,6 +310,7 @@ class RootHelperBase(object):
         out_file = self.TFile_safe_open(file_name, access)
         out_file.cd()
         if self.DEBUG:
+            self.log.debug('Dumping basket to file.')
             self.pp.pprint(self.root_fruit_basket)
 
         for item_name in self.root_fruit_basket.keys():

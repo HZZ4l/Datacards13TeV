@@ -1,8 +1,28 @@
-from Logger import *
-import re, string, pdb
-import os.path
 
-#TODO: instead of update put recursive update from MiscTools.py
+import re, string, pdb, os.path
+from nested_dict import flatten, unflatten, filter_flatten_dict
+from Logger import Logger
+
+
+def update_leaf(initial_dict, update_dict):
+    """Smart update of dictionaries, by leaf.
+
+    TODO Not implemented yet. Returning simple dict update.
+    IDEA: Make tuple dict where tuple is made of keys and value is the last node.
+
+
+    It will update recursivlely, only when the leaf is found.
+    For example:
+    a = {'a':1, 'b':{'c':2, 'd':'3'}}
+    b = {'a':2, 'b':{'c':3, 'e':'3'}}
+    c = update_leafs(a,b)
+    c = {'a':2, 'b':{'c':3,'e':'3','d':'3'}}
+    """
+    import nested_dict as nd
+    nd_initial_dict = nd.nested_dict(initial_dict)
+    nd_update_dict = nd.nested_dict(update_dict)
+    nd_initial_dict.update(nd_update_dict)
+    return nd_initial_dict.to_dict()
 
 class UniversalConfigParser(object):
     """
@@ -90,6 +110,7 @@ class UniversalConfigParser(object):
 	    We want to append dictionaries from all the config files.
 	    """
 	    self.this_cfg_dir = os.path.dirname(os.path.abspath(cfg_file))
+	    #os.environ['THIS_CFG_DIR'] =  str(self.this_cfg_dir)
 
 	    if self.cfg_type == None: self.cfg_type = self._get_cfg_type(cfg_file)
 	    self.log.debug('Updating dictionary from config file in the order provided: %s',str(cfg_file) )
@@ -105,6 +126,13 @@ class UniversalConfigParser(object):
         self._interpret_keywords_and_update(self.cfg_dict)
 
 	return self.cfg_dict
+
+    def get_cfg_dirname(self):
+        """
+        Get abspath of directory where current config lives.
+        """
+        return self.this_cfg_dir
+
 
     def _interpret_keywords_and_update(self, this_dict):
         """
@@ -144,12 +172,11 @@ class UniversalConfigParser(object):
 
                     ##now do the interatation
                     if isinstance(item, str):
-                        all_matches = re.findall("INSERT\((.+?)\)",str(item))
+                        all_matches = re.findall(r"INSERT\((.+?)\)",str(item))
                         #print 'all_matches_list', all_matches
                         if len(all_matches)>0:
                             self.log.debug('Parsing with INSERT: {0}'.format(item))
                             obj[idx] = INSERT(obj[idx])
-
 
 
         def INSERT(input_line):
@@ -160,8 +187,22 @@ class UniversalConfigParser(object):
             - gets value for full_config['2e2mu']['ggH']
             """
             pattern = "INSERT\((.+?)\)"
-            tokens = re.split(pattern,input_line)
-            matching_tokens = re.findall(pattern,input_line)
+            p = re.compile(r'''
+                    INSERT     #look for INSERT
+                    \(         #match opening (
+                    [^\(\)]*?  #match anything but ( or )
+                    \)         #match closing )
+                    ''', re.VERBOSE)
+            #tokens = p.split(input_line)
+            #matching_tokens = p.findall(input_line)
+            tokens = re.split(pattern, input_line)
+            matching_tokens = re.findall(pattern, input_line)
+
+
+            #raise error if using multiple enclosed INSERT commands INSERT(INSERT()...)
+            if p.search(p.sub('XXX',input_line)):
+                raise RuntimeError, ('Multiple-level INSERT commands are not allowed. '
+                                     'Check your configuration files.')
 
             self.log.debug('tokens: {0}\nmatching_tokens: {1}'.format(tokens, matching_tokens))
 
@@ -194,16 +235,34 @@ class UniversalConfigParser(object):
                         #TODO check that youare notrreading the same file which is already read not to blow up the memory.
                         #print full_config
                         if len(keys)>0:
-                            partial_config = full_config
-                            for item in keys:
-                                #in this way we get the last item
-                                partial_config = partial_config[item]
+                            #check if there are wildcards used
+                            #use_fnmatch = any(c in '*?[],' for c in string.join(keys))
+                            #p = re.compile(r'[\*\?\[\]\,]')  #wildcards possible '*?[],'
+                            use_fnmatch = bool(re.search(r'[\*\?\[\]\,]', string.join(keys)))
+
+                            if use_fnmatch:
+                                partial_config_flat = filter_flatten_dict(flatten(full_config),keys)
+                                partial_config = unflatten(partial_config_flat).to_dict()
+
+                                #if len(new_dict.keys)==1 return the value
+                                if len(partial_config_flat.keys())==1:
+                                    partial_config = partial_config_flat[partial_config_flat.keys()[0]]
+
+                            else:
+                                partial_config = full_config
+                                for item in keys:
+                                    #in this way we get the last item
+                                    partial_config = partial_config[item]
+
                             if not enforce_string:
                                 return partial_config
                             else:
                                 new_input_line+=str(partial_config)  #basically inserts value
                         else:
                             return full_config
+
+
+
                     else:
                         raise RuntimeError, 'THIS_CONFIG is not yet implemented keyword!'
 
@@ -221,7 +280,6 @@ class UniversalConfigParser(object):
             self.log.debug('Updated dictionary (after reparsing) keywords: ')
             print this_dict
         return this_dict
-
 
 
     def _get_dict_yaml(self,file_name):
