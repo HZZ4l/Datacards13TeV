@@ -1,0 +1,200 @@
+mass_range: '124, 126'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : 1Jettagged
+    meanBW : '124.17'
+    mean   : '0.64316'
+    sigma  : '1.365'
+    alpha  : '0.63656'
+    n      : '5.5701'
+    alpha2 : '1.7109'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : Untagged
+    meanBW : '124.172'
+    mean   : '0.643158'
+    sigma  : '1.36496'
+    alpha  : '0.636558'
+    n      : '5.57011'
+    alpha2 : '1.71086'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : VBFtagged
+    meanBW : '124.17'
+    mean   : '0.64316'
+    sigma  : '1.365'
+    alpha  : '0.63656'
+    n      : '5.5701'
+    alpha2 : '1.7109'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : VHHadronictagged
+    meanBW : '124.17'
+    mean   : '0.64316'
+    sigma  : '1.365'
+    alpha  : '0.63656'
+    n      : '5.5701'
+    alpha2 : '1.7109'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : VHleptonictagged
+    meanBW : '124.17'
+    mean   : '0.64316'
+    sigma  : '1.365'
+    alpha  : '0.63656'
+    n      : '5.5701'
+    alpha2 : '1.7109'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 2e2mu
+Category : ttHtagged
+    meanBW : '124.17'
+    mean   : '0.64316'
+    sigma  : '1.365'
+    alpha  : '0.63656'
+    n      : '5.5701'
+    alpha2 : '1.7109'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : 1Jettagged
+    meanBW : '124.25'
+    mean   : '0.017175'
+    sigma  : '1.7635'
+    alpha  : '0.56668'
+    n      : '9.9994'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : Untagged
+    meanBW : '124.25'
+    mean   : '0.0171754'
+    sigma  : '1.76348'
+    alpha  : '0.56668'
+    n      : '9.99935'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : VBFtagged
+    meanBW : '124.25'
+    mean   : '0.017175'
+    sigma  : '1.7635'
+    alpha  : '0.56668'
+    n      : '9.9994'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : VHHadronictagged
+    meanBW : '124.25'
+    mean   : '0.017175'
+    sigma  : '1.7635'
+    alpha  : '0.56668'
+    n      : '9.9994'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : VHleptonictagged
+    meanBW : '124.25'
+    mean   : '0.017175'
+    sigma  : '1.7635'
+    alpha  : '0.56668'
+    n      : '9.9994'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4e
+Category : ttHtagged
+    meanBW : '124.25'
+    mean   : '0.017175'
+    sigma  : '1.7635'
+    alpha  : '0.56668'
+    n      : '9.9994'
+    alpha2 : '5.8643'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : 1Jettagged
+    meanBW : '125.04'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.2356'
+    n      : '2.0609'
+    alpha2 : '1.7122'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : Untagged
+    meanBW : '125.045'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.23556'
+    n      : '2.06086'
+    alpha2 : '1.71216'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : VBFtagged
+    meanBW : '125.04'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.2356'
+    n      : '2.0609'
+    alpha2 : '1.7122'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : VHHadronictagged
+    meanBW : '125.04'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.2356'
+    n      : '2.0609'
+    alpha2 : '1.7122'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : VHleptonictagged
+    meanBW : '125.04'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.2356'
+    n      : '2.0609'
+    alpha2 : '1.7122'
+    n2     : '20'
+
+Sample   : ggH
+Channel  : 4mu
+Category : ttHtagged
+    meanBW : '125.04'
+    mean   : '-0.12234'
+    sigma  : '1.0817'
+    alpha  : '1.2356'
+    n      : '2.0609'
+    alpha2 : '1.7122'
+    n2     : '20'
+
