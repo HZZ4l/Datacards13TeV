@@ -1,0 +1,44 @@
+hzz_pdf:
+    UnTagged: &pdf_untagged
+        type: lnN
+        ggH: 1.999999999999999
+        #qqH: 1.000000000000
+        WH: 1.999999999999999
+        #ZH: 1.000000000000
+        #ttH: 1.000000000000
+        #qqZZ: 1.000000000000
+        #ggZZ: 1.000000000000
+    OneJetTagged:
+        <<: *pdf_untagged
+    #VBFTagged:
+        #<<: *pdf_untagged
+    #VHLeptTagged:
+        #<<: *pdf_untagged
+    #VHHadrTagged:
+        #<<: *pdf_untagged
+    #ttHTagged:
+        #<<: *pdf_untagged
+
+#hzz_BR:
+
+    #UnTagged: &BR_untagged
+        #type : lnN
+        #ggH: 1.000000000000
+        #qqH: 1.000000000000
+        #WH: 1.000000000000
+        #ZH: 1.000000000000
+        #ttH: 1.000000000000
+        #qqZZ: 1.000000000000
+        #ggZZ: 1.000000000000
+
+    ##OneJetTagged:
+        ##<<: *BR_untagged
+    ##VBFTagged:
+        ##<<: *BR_untagged
+    ##VHLeptTagged:
+        ##<<: *BR_untagged
+    ##VHHadrTagged:
+        ##<<: *BR_untagged
+    ##ttHTagged:
+        ##<<: *BR_untagged
+

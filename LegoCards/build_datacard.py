@@ -422,7 +422,7 @@ class LegoCards(object):
     def _get_template(self, shape_setup, new_template_name=None):
         """Get template from histogram and make it RooHistPdf.
         """
-        self.log.debug('Creating RooHistPdf from given histogram.')
+        self.log.info('Creating RooHistPdf from given histogram.')
         all_matches = re.findall("Template::(.+?)\((.+?)\)",shape_setup)
 
         if new_template_name:
