@@ -156,7 +156,9 @@ class LegoCards(object):
         """
         #we need this for some pdf functions, e.g. RooDoubleCB whic doesn't exist
         #in plane RooFit
-        gSystem.Load("$CMSSW_BASE/lib/slc5_amd64_gcc472/libHiggsAnalysisCombinedLimit.so")
+        gSystem.Load("$CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
+
+
 
         self.w = RooWorkspace('w')
 
@@ -209,6 +211,7 @@ class LegoCards(object):
                 'obervation in txt datacard and sum of entries in RooDataSet::data_obs')
 
         self.data_obs.SetNameTitle('data_obs','data_obs')
+        getattr(self.w,'import')(self.data_obs, RooFit.Rename(self.data_obs.GetName()))
 
         #run all functions_and_definitions:
 
@@ -239,6 +242,7 @@ class LegoCards(object):
 
                     if p_setup['shape'].lower().startswith('template'):
                         the_template = self._get_template(p_setup['shape'])
+
                         if self.DEBUG:
                             self.log.debug('Imported template for {0}'.format(p_id))
                             the_template.Print('v')
@@ -246,7 +250,7 @@ class LegoCards(object):
                         self.w.factory(p_setup['shape'])
         self.log.debug('Printing workspace...')
 
-        getattr(self.w,'import')(self.data_obs)
+        #getattr(self.w,'import')(self.data_obs)
         print 20*"----"
         self.w.Print()
         print 20*"----"
@@ -489,7 +493,7 @@ class LegoCards(object):
                                     roo_data_hist)
 
 
-        getattr(self.w,'import')(roo_hist_pdf)
+        getattr(self.w,'import')(roo_hist_pdf, RooFit.Rename(roo_hist_pdf.GetName()))
 
         return self.w.pdf(roo_hist_pdf.GetName())
 
