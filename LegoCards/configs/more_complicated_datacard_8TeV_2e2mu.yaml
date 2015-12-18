@@ -4,7 +4,8 @@ setup: INSERT(common_setup_8TeV.yaml:COMMON_SETUP)
 
 category: 2e2mu_UnTagged
 observation:
-    rate: 8
+    #rate will be taken from the selected tree
+    rate: -1
     source:
         #path given as a/b/c.root/myrootdir/mytree
         #path: inputs/data_observed_8TeV.root/passedEvents

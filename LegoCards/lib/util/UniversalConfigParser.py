@@ -309,21 +309,21 @@ class UniversalConfigParser(object):
         with open(file_name,'r') as fd:
             self.cfg_dict.update(ini.load(fd))
 
-    def dump_to_json(self,json_file_name, new_dict):
+    def dump_to_json(self,dump_file_name, new_dict):
        import json
-       if not os.path.exists(os.path.dirname(json_file_name)):
-            os.makedirs(os.path.dirname(json_file_name))
+       if os.path.dirname(dump_file_name) and not os.path.exists(os.path.dirname(dump_file_name)):
+            os.makedirs(os.path.dirname(dump_file_name))
 
-       with open(json_file_name, "w") as json_file:
+       with open(dump_file_name, "w") as json_file:
             json_file.write(json.dumps(new_dict, indent=4))
-            self.log.info('Written json file: {0}'.format(json_file_name))
+            self.log.info('Written json file: {0}'.format(dump_file_name))
 
 
-    def dump_to_yaml(self,yaml_file_name, new_dict):
+    def dump_to_yaml(self,dump_file_name, new_dict):
         import yaml
-        if not os.path.exists(os.path.dirname(yaml_file_name)):
-            os.makedirs(os.path.dirname(yaml_file_name))
-        with open(yaml_file_name, 'w') as yaml_file:
+        if os.path.dirname(dump_file_name) and not os.path.exists(os.path.dirname(dump_file_name)):
+                os.makedirs(os.path.dirname(dump_file_name))
+        with open(dump_file_name, 'w') as yaml_file:
             yaml_file.write( yaml.dump(new_dict, default_flow_style=False))
-            self.log.info('Written yaml file: {0}'.format(yaml_file_name))
+            self.log.info('Written yaml file: {0}'.format(dump_file_name))
 

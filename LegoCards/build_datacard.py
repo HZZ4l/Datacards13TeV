@@ -18,7 +18,7 @@ from lib.util.Logger import Logger
 from lib.util.UniversalConfigParser import UniversalConfigParser
 from lib.RootHelpers.RootHelperBase import RootHelperBase
 from lib.RooFit.ToyDataSetManager import ToyDataSetManager
-from lib.util.MiscTools import flatten_list
+import lib.util.MiscTools as misc
 import lib.util.nested_dict as nd
 
 class LegoCards(object):
@@ -63,6 +63,7 @@ class LegoCards(object):
             self.pp.pprint(self.d_input)
 
         self.cfg_absdir = None
+        self.out_dir = './'
         self.log.debug('Datacard: {0} Datacard input: {1}'.format(self.datacard_name,
                                                                   self.d_input))
 
@@ -135,7 +136,7 @@ class LegoCards(object):
         txt_card+= textwrap.dedent(self.systematics_lines)
         print txt_card
 
-        file_datacard_name = self.datacard_name+'.txt'
+        file_datacard_name = os.path.join(self.out_dir,self.datacard_name+'.txt')
         if self.lumi_scaling != 1.0:
             file_datacard_name = file_datacard_name.replace('.txt',
                                                             '.lumi_scale_{0:3.2f}.txt'
@@ -154,6 +155,14 @@ class LegoCards(object):
         - define shapes
         - fetch dataset from root-trees
         """
+        #check if the workspace should be created at all
+        if self._need_workspace():
+            workspace_filename = self._get_workspace_file_name()
+            self.log.info("Creating workspace with name: {0}".format(workspace_filename))
+        else:
+            self.log.info("There is no need to create the workspace file.")
+            return
+
         #we need this for some pdf functions, e.g. RooDoubleCB whic doesn't exist
         #in plane RooFit
         gSystem.Load("$CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
@@ -202,16 +211,21 @@ class LegoCards(object):
         self.data_obs = dataset_tool.get_dataset_from_tree(
                                                 data_obs_path,
                                                 tree_variables = data_obs_branches,
-                                                weight = "1==1",
+                                                weight = self.d_input['observation']['source']['selection'],
                                                 weight_var_name=0,
                                                 dataset_name = "data_obs",
                                                 basket=False,
                                                 category = None)
+        self.n_data_obs = self.data_obs.numEntries()
         assert self._get_observed_rate()==self.data_obs.sumEntries(), ('Mismatch between '
-                'obervation in txt datacard and sum of entries in RooDataSet::data_obs')
+                'observation in txt datacard and sum of entries in RooDataSet::data_obs\n'
+                'HINT: If you put negative number for observation in txt datacard then the '
+                'rate will be taken from RooDataSet::data_obs automatically!')
 
         self.data_obs.SetNameTitle('data_obs','data_obs')
         getattr(self.w,'import')(self.data_obs, RooFit.Rename(self.data_obs.GetName()))
+
+
 
         #run all functions_and_definitions:
 
@@ -242,6 +256,10 @@ class LegoCards(object):
 
                     if p_setup['shape'].lower().startswith('template'):
                         the_template = self._get_template(p_setup['shape'])
+                        assert the_template.GetName() == p_id, (
+                            'Template pdf name must be identical to process name.\n'
+                            'You provided process_name = {0} and '
+                            'template_name = {1}'.format(p_id, the_template.GetName()))
 
                         if self.DEBUG:
                             self.log.debug('Imported template for {0}'.format(p_id))
@@ -254,8 +272,20 @@ class LegoCards(object):
         print 20*"----"
         self.w.Print()
         print 20*"----"
-        self.w.writeToFile(self.workspace_file)
-        self.log.info('Datacard workspace saved: {0}'.format(self.workspace_file))
+        self.w.writeToFile(os.path.join(self.out_dir, workspace_filename))
+        self.log.info('Datacard workspace saved: {0}'
+                      .format(self.out_dir + workspace_filename))
+
+    #___________________________________________________________________________
+    def set_out_dir(self, out_dir):
+        """
+        Set the output directory of the cards.
+        Otherwise use the current directory.
+        """
+        self.out_dir = out_dir
+        misc.make_sure_path_exists(self.out_dir)
+        self.log.debug('Output directory set to: {0}'.format(self.out_dir))
+        return
 
     #___________________________________________________________________________
     def set_cfg_dir(self,dir_name):
@@ -312,7 +342,10 @@ class LegoCards(object):
         #We need abspath of the
         previous_dir = os.getcwd()
         os.chdir(which_is_ralative_to)
-        os.chdir(os.path.dirname(of_file)) #go where the file is
+        os.path.dirname(of_file)
+        of_file_dir = os.path.dirname(of_file)
+        if of_file_dir=='': of_file_dir='.'
+        os.chdir(of_file_dir) #go where the file is
         of_file = os.path.join(os.getcwd(), os.path.basename(of_file))
         os.chdir(previous_dir) #come back where we started
 
@@ -383,9 +416,9 @@ class LegoCards(object):
             return []
         else:
             new_fnd_list = []
-            #self._flatten_list(input_list = data['functions_and_definitions'],
+            #self._misc.flatten_list(input_list = data['functions_and_definitions'],
                                #output_list = new_fnd_list)
-            flatten_list(input_list = data['functions_and_definitions'],
+            misc.flatten_list(input_list = data['functions_and_definitions'],
                         output_list = new_fnd_list)
 
             data['functions_and_definitions'] = new_fnd_list
@@ -393,7 +426,41 @@ class LegoCards(object):
             self.log.debug('functions_and_definitions: {0}'.format(new_fnd_list))
             return data['functions_and_definitions']
 
+    #___________________________________________________________________________
+    def _need_workspace(self):
+        """Checks if there are any lines with shapes or functions_and_definitions.
+        In case they exist then the workspace will be created.
+        """
 
+        flat_d_input = nd.flatten(self.d_input)
+        for tuple_key in flat_d_input.keys():
+            #The shapes and functions_and_definitions should be the last element
+            #in the tuple key name.
+            if tuple_key[-1] in ['source', 'shapes', 'functions_and_definitions']:
+
+                self.log.debug('Workspace file name: {0}'.format(self._get_workspace_file_name()))
+                del flat_d_input  #not to vaste memory (the configuration could be big)
+                return True
+        self.log.debug('No workspace will be used.')
+        return False
+
+    #___________________________________________________________________________
+    def _get_workspace_file_name(self):
+        """
+        If workspace should be created this function will give the file name.
+        """
+        try:
+            self.workspace_file
+        except AttributeError:
+            self.workspace_file = "{0}.input.root".format(self.datacard_name)
+            if self.lumi_scaling != 1.0:
+                self.workspace_file = self.workspace_file.replace(
+                                        'input',
+                                        'lumi_scale_{0:3.2f}.input'
+                                        .format(self.lumi_scaling))
+        else:
+            pass
+        return self.workspace_file
     #___________________________________________________________________________
     def _get_shapes_line(self):
         """Gets the line with shape
@@ -409,16 +476,16 @@ class LegoCards(object):
             else:
                 if self.d_input['processes'][p]['shape']:
                     self.shapes_exist = True
-                    self.workspace_file = "{0}.input.root".format(self.datacard_name)
-                    if self.lumi_scaling != 1.0:
-                        self.workspace_file = self.workspace_file.replace('input',
-                                                                        'lumi_scale_{0:3.2f}.input'
-                                                                        .format(self.lumi_scaling))
+                    #self.workspace_file = "{0}.input.root".format(self.datacard_name)
+                    #if self.lumi_scaling != 1.0:
+                        #self.workspace_file = self.workspace_file.replace('input',
+                                                                        #'lumi_scale_{0:3.2f}.input'
+                                                                        #.format(self.lumi_scaling))
                     break
 
         if self.shapes_exist:
             return "shapes *    cat_{0}  {1} w:$PROCESS".format(self.d_input['category'],
-                                                                self.workspace_file)
+                                                                self._get_workspace_file_name())
         else:
             return "#shapes are not used - counting experiment card"
 
@@ -573,7 +640,15 @@ class LegoCards(object):
         """Read the data from trees and applies a cut.
         So far, we only get rate directly as a number.
         """
-        return self.d_input['observation']['rate']
+        assert isinstance(self.d_input['observation']['rate'], int), (
+            "Observed rate must be positive integer. "
+            "If observation is negative number then the rate will be taken "
+            "from selection root-tree."
+            )
+        if self.d_input['observation']['rate'] >= 0 :
+            return self.d_input['observation']['rate']
+        else:  #we assume the rate will be taken from the data_obs numEntries
+            return self.n_data_obs
 
 
 
@@ -736,7 +811,9 @@ class LegoCards(object):
         for tuple_key in flat_sys_dict.keys():
             assert len(tuple_key)>=2, ('Wrong format of systematics dictionary. '
                                     'Should be sys_name:process_sys_size')
+
         keys_set = set([key[:-1] for key in flat_sys_dict.keys()])
+        self.log.debug(keys_set)
         #make sure that all the sys_names are different, and that all the
         assert len(keys_set)==len(set(item[0] for item in keys_set)), (
                         'Wrong format of systematics dictionary. '
@@ -770,6 +847,9 @@ def parseOptions():
     parser.add_option(''  , '--cfg', dest='config_filename', type='string',
                       default="build_datacards_from_dict.yaml",
                       help='Name of the file with full configuration')
+    parser.add_option('-d'  , '--outdir', dest='out_dir', type='string',
+                      default=".",
+                      help='Output directory for cards txt and workspace.')
     parser.add_option('-c', '--category', dest='category', type='string',
                       default = None,
                       help=('Name of the section/category from yaml cfg file to be run. '
@@ -802,9 +882,12 @@ def main():
                                  datacard_name = datacard_name)
 
     datacard_builder.set_cfg_dir(opt.config_filename)
+    datacard_builder.set_out_dir(opt.out_dir)
     datacard_builder.scale_lumi_by(opt.scale_lumi_by)
-    datacard_builder.make_txt_card()
     datacard_builder.make_workspace()
+    datacard_builder.make_txt_card()
+
+
 
     #dump the final cnfiguration to yaml,json (will be used to display as webage)
     #filename_full_cfg = os.path.join('full_configs/',os.path.basename(opt.config_filename))
